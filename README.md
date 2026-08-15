@@ -35,9 +35,6 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 - An honest answer to "is it ethical to buy one?"
 - A healthier breed alternative
 
-### 4. Snowflake Data Layer
-Breed popularity, bite incident statistics, shelter surrender rates, and welfare trend data stored and queried via **Snowflake Data Cloud**. Surfaces contextual data alongside AI-generated assessments.
-
 ---
 
 ## Tech Stack
@@ -45,7 +42,6 @@ Breed popularity, bite incident statistics, shelter surrender rates, and welfare
 | Layer | Technology |
 |-------|-----------|
 | AI Assessment & Breed Health | Google AI (Gemini) |
-| Welfare Data | Snowflake Data Cloud |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
 
@@ -78,7 +74,6 @@ Set `VITE_LIVE_MODE=true` in `.env` once you want to hit the live Gemini API. Ke
 ## Prize Categories
 
 - ✅ **Best Use of Google AI** — Core AI assessment engine and breed health analysis
-- ✅ **Best Use of Snowflake** — Breed welfare data storage and querying
 
 ---
 
