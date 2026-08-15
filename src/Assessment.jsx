@@ -80,6 +80,7 @@ export default function Assessment({ onComplete, onBack }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [identifying, setIdentifying] = useState(false);
   const [identifyError, setIdentifyError] = useState(null);
   const [photoThumbs, setPhotoThumbs] = useState({});
@@ -107,10 +108,10 @@ export default function Assessment({ onComplete, onBack }) {
     } catch { return null; }
   };
 
-  const selectBreed = (item) => setBreed({ ...item, image: `/images/${item.id}.jpg` });
+  const selectBreed = (item) => { setSearchOpen(false); setBreed({ ...item, image: `/images/${item.id}.jpg` }); };
 
   const selectFromSearch = async (item) => {
-    setQuery('');
+    setSearchOpen(false);
     let url = null;
     if (!photoThumbs[item.id]) {
       url = await dogceoImage(item.slug);
@@ -153,6 +154,7 @@ export default function Assessment({ onComplete, onBack }) {
         if (image) setPhotoThumbs((prev) => ({ ...prev, [match.id]: image }));
       }
       const picked = { ...(match || { id: result.id, label: result.label || 'Mixed breed', risk: 'medium', slug: null }), image: image || URL.createObjectURL(file), photo: file };
+      setSearchOpen(false);
       setBreed(picked);
     } catch (err) {
       setIdentifyError(err.message || 'Could not identify the dog. Please try again.');
@@ -201,9 +203,9 @@ export default function Assessment({ onComplete, onBack }) {
       <div className="breed-more">
         <div className="kicker breed-more-kicker">Don't see the dog?</div>
         <div className="breed-more-row">
-          <div className="breed-search">
-            <input className="breed-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search any breed…" />
-            {matches.length > 0 && (
+          <div className="breed-search" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setSearchOpen(false); }}>
+            <input className="breed-search-input" value={query} onFocus={() => setSearchOpen(true)} onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }} placeholder="Search any breed…" />
+            {searchOpen && matches.length > 0 && (
               <ul className="breed-search-list">
                 {matches.map((item) => (
                   <li key={item.id}>
@@ -234,6 +236,6 @@ export default function Assessment({ onComplete, onBack }) {
       <label className="custom-label" htmlFor={`custom-${current.id}`}>Your answer, in your own words <span>optional but useful</span></label><textarea id={`custom-${current.id}`} className="custom-answer" value={custom[current.id] || ''} onChange={(event) => setCustom((prev) => ({ ...prev, [current.id]: event.target.value }))} placeholder="Add the detail the choices missed…" rows="3" />
       {error && <p className="error-msg">{error}</p>}
     </section>}
-    <footer className="assessment-footer"><button className="secondary-action" onClick={onBack}>Home</button>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
+    <footer className={`assessment-footer${searchOpen && matches.length > 0 ? ' hidden' : ''}`}>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
   </main>;
 }
