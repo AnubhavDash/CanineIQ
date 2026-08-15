@@ -108,7 +108,7 @@ export default function Assessment({ onComplete, onBack }) {
     } catch { return null; }
   };
 
-  const selectBreed = (item) => { setSearchOpen(false); setBreed({ ...item, image: `/images/${item.id}.jpg` }); };
+  const selectBreed = (item) => { setSearchOpen(false); setBreed({ ...item, source: 'card', image: `/images/${item.id}.jpg` }); };
 
   const selectFromSearch = async (item) => {
     setSearchOpen(false);
@@ -117,7 +117,7 @@ export default function Assessment({ onComplete, onBack }) {
       url = await dogceoImage(item.slug);
       if (url) setPhotoThumbs((prev) => ({ ...prev, [item.id]: url }));
     }
-    setBreed({ ...item, image: url || `/images/${item.id}.jpg` });
+    setBreed({ ...item, source: 'search', image: url || `/images/${item.id}.jpg` });
   };
 
   const identifyDog = async (file) => {
@@ -153,7 +153,7 @@ export default function Assessment({ onComplete, onBack }) {
         if (match.slug) image = await dogceoImage(match.slug);
         if (image) setPhotoThumbs((prev) => ({ ...prev, [match.id]: image }));
       }
-      const picked = { ...(match || { id: result.id, label: result.label || 'Mixed breed', risk: 'medium', slug: null }), image: image || URL.createObjectURL(file), photo: file };
+      const picked = { ...(match || { id: result.id, label: result.label || 'Mixed breed', risk: 'medium', slug: null }), source: 'photo', image: image || URL.createObjectURL(file), photo: file };
       setSearchOpen(false);
       setBreed(picked);
     } catch (err) {
@@ -228,7 +228,8 @@ export default function Assessment({ onComplete, onBack }) {
             {identifyError && <p className="identify-error">{identifyError}</p>}
           </div>
         </div>
-        {breed?.photo && <div className="identified-note">Identified from your photo: <strong>{breed.label}</strong> ✓</div>}
+        {breed?.source === 'photo' && <div className="identified-note">Identified from your photo: <strong>{breed.label}</strong> ✓</div>}
+        {breed?.source === 'search' && <div className="identified-note">Selected from search: <strong>{breed.label}</strong> ✓</div>}
       </div>
     </section> : <section className="assessment-content fade-up" key={current.id}>
       <p className="kicker">Question {step} / {QUESTIONS.length}</p><h1 className="q-title">{current.question}</h1><p className="q-sub">Pick the closest answer. Then add context if the choices do not tell the whole truth.</p>
