@@ -109,6 +109,12 @@ Set these in Vercel → Settings → Environment Variables, then redeploy. Keys 
 
 ---
 
+## Privacy
+
+Privacy-friendly by design: no accounts, no database, no analytics, no cookies. Assessment answers, uploaded photos, and the read-aloud letter are processed transiently by the API and never stored server-side; your results live only in your browser's local storage.
+
+---
+
 ## Sources
 
 Breed health information draws on public veterinary and welfare sources, including the [Orthopedic Foundation for Animals (OFA)](https://www.ofa.org/), [AKC Canine Health Foundation](https://www.akcchf.org/), [The Kennel Club (UK) health schemes](https://www.thekennelclub.org.uk/health/), [RSPCA brachycephalic guidance](https://www.rspca.org.uk/adviceandwelfare/pets/dogs/health/brachycephalic), [University of Cambridge brachycephalic research](https://www.vet.cam.ac.uk/), and [Cornell University's BOAS overview](https://www.vet.cornell.edu/departments-centers-and-institutes/riney-canine-health-center/canine-health-topics/brachycephalic-obstructive-airway-syndrome-boas). Figures shown are qualitative ranges ("varies by severity") rather than precise statistics, because inherited-disease risk is line-specific — always confirm with a veterinarian and the breeder's health-testing documentation. Dog photos: [Dog CEO API](https://dog.ceo/).
