@@ -1,17 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import './Assessment.css';
 
 const BREEDS = [
-  { id: 'pitbull', label: 'Pit bull', risk: 'high' },
-  { id: 'rottweiler', label: 'Rottweiler', risk: 'high' },
-  { id: 'german_shepherd', label: 'German Shepherd', risk: 'medium' },
-  { id: 'husky', label: 'Husky / Malamute', risk: 'medium' },
-  { id: 'labrador', label: 'Labrador Retriever', risk: 'low' },
-  { id: 'french_bulldog', label: 'French Bulldog', risk: 'health' },
-  { id: 'pug', label: 'Pug', risk: 'health' },
-  { id: 'english_bulldog', label: 'English Bulldog', risk: 'health' },
-  { id: 'doberman', label: 'Doberman Pinscher', risk: 'high' },
-  { id: 'border_collie', label: 'Border Collie', risk: 'medium' },
+  { id: 'pitbull', label: 'Pit bull', risk: 'high', slug: 'pitbull' },
+  { id: 'rottweiler', label: 'Rottweiler', risk: 'high', slug: 'rottweiler' },
+  { id: 'german_shepherd', label: 'German Shepherd', risk: 'medium', slug: 'germanshepherd' },
+  { id: 'husky', label: 'Husky / Malamute', risk: 'medium', slug: 'husky' },
+  { id: 'labrador', label: 'Labrador Retriever', risk: 'low', slug: 'labrador' },
+  { id: 'french_bulldog', label: 'French Bulldog', risk: 'health', slug: 'bulldog/french' },
+  { id: 'pug', label: 'Pug', risk: 'health', slug: 'pug' },
+  { id: 'english_bulldog', label: 'English Bulldog', risk: 'health', slug: 'bulldog/english' },
+  { id: 'doberman', label: 'Doberman Pinscher', risk: 'high', slug: 'doberman' },
+  { id: 'border_collie', label: 'Border Collie', risk: 'medium', slug: 'collie/border' },
+];
+
+const BREED_ALIASES = {
+  american_pit_bull_terrier: 'pitbull',
+  american_staffordshire_terrier: 'pitbull',
+  pit_bull: 'pitbull',
+  staffordshire_bull_terrier: 'pitbull',
+  miniature_pinscher: 'doberman',
+  german_shepherd_dog: 'german_shepherd',
+  siberian_husky: 'husky',
+  alaskan_malamute: 'husky',
+  golden_retriever: 'golden_retriever',
+};
+
+const MORE_BREEDS = [
+  { id: 'beagle', label: 'Beagle', risk: 'low', slug: 'beagle' },
+  { id: 'boxer', label: 'Boxer', risk: 'high', slug: 'boxer' },
+  { id: 'chihuahua', label: 'Chihuahua', risk: 'low', slug: 'chihuahua' },
+  { id: 'dalmatian', label: 'Dalmatian', risk: 'medium', slug: 'dalmatian' },
+  { id: 'dachshund', label: 'Dachshund', risk: 'health', slug: 'dachshund' },
+  { id: 'samoyed', label: 'Samoyed', risk: 'medium', slug: 'samoyed' },
+  { id: 'akita', label: 'Akita', risk: 'high', slug: 'akita' },
+  { id: 'chow_chow', label: 'Chow Chow', risk: 'high', slug: 'chow' },
+  { id: 'corgi', label: 'Corgi', risk: 'medium', slug: 'corgi-cardigan' },
+  { id: 'eskimo_dog', label: 'American Eskimo Dog', risk: 'medium', slug: 'eskimo' },
+  { id: 'havanese', label: 'Havanese', risk: 'low', slug: 'havanese' },
+  { id: 'malamute', label: 'Alaskan Malamute', risk: 'high', slug: 'malamute' },
+  { id: 'newfoundland', label: 'Newfoundland', risk: 'medium', slug: 'newfoundland' },
+  { id: 'papillon', label: 'Papillon', risk: 'low', slug: 'papillon' },
+  { id: 'pekinese', label: 'Pekingese', risk: 'health', slug: 'pekinese' },
+  { id: 'pomeranian', label: 'Pomeranian', risk: 'low', slug: 'pomeranian' },
+  { id: 'poodle', label: 'Poodle', risk: 'low', slug: 'poodle-standard' },
+  { id: 'whippet', label: 'Whippet', risk: 'low', slug: 'whippet' },
+  { id: 'weimaraner', label: 'Weimaraner', risk: 'high', slug: 'weimaraner' },
+  { id: 'maltese', label: 'Maltese', risk: 'low', slug: 'maltese' },
+  { id: 'shiba_inu', label: 'Shiba Inu', risk: 'medium', slug: 'shiba' },
+  { id: 'bull_terrier', label: 'Bull Terrier', risk: 'high', slug: 'bullterrier-staffordshire' },
+  { id: 'miniature_pinscher', label: 'Miniature Pinscher', risk: 'low', slug: 'pinscher' },
+  { id: 'puggle', label: 'Puggle', risk: 'medium', slug: 'puggle' },
+  { id: 'golden_retriever', label: 'Golden Retriever', risk: 'low', slug: 'retriever/golden' },
+  { id: 'great_dane', label: 'Great Dane', risk: 'high', slug: 'dane' },
+  { id: 'shih_tzu', label: 'Shih Tzu', risk: 'health', slug: 'shihtzu' },
+  { id: 'cocker_spaniel', label: 'Cocker Spaniel', risk: 'low', slug: 'spaniel/cocker' },
+  { id: 'yorkshire_terrier', label: 'Yorkshire Terrier', risk: 'low', slug: 'terrier/yorkshire' },
+  { id: 'west_highland', label: 'West Highland Terrier', risk: 'low', slug: 'terrier/westhighland' },
 ];
 
 const QUESTIONS = [
@@ -34,9 +79,88 @@ export default function Assessment({ onComplete, onBack }) {
   const [custom, setCustom] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [query, setQuery] = useState('');
+  const [identifying, setIdentifying] = useState(false);
+  const [identifyError, setIdentifyError] = useState(null);
+  const [photoThumbs, setPhotoThumbs] = useState({});
+  const fileRef = useRef(null);
   const total = QUESTIONS.length + 1;
   const current = QUESTIONS[step - 1];
   const answer = current ? answers[current.id] : null;
+
+  const ALL_BREEDS = useMemo(() => {
+    const seen = new Set(BREEDS.map((b) => b.id));
+    return [...BREEDS, ...MORE_BREEDS.filter((b) => !seen.has(b.id))];
+  }, []);
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return ALL_BREEDS.filter((b) => b.label.toLowerCase().includes(q)).slice(0, 8);
+  }, [query, ALL_BREEDS]);
+
+  const dogceoImage = async (slug) => {
+    try {
+      const res = await fetch(`https://dog.ceo/api/breed/${slug}/images/random`);
+      const data = await res.json();
+      return data.status === 'success' ? data.message : null;
+    } catch { return null; }
+  };
+
+  const selectBreed = (item) => setBreed({ ...item, image: `/images/${item.id}.jpg` });
+
+  const selectFromSearch = async (item) => {
+    setQuery('');
+    let url = null;
+    if (!photoThumbs[item.id]) {
+      url = await dogceoImage(item.slug);
+      if (url) setPhotoThumbs((prev) => ({ ...prev, [item.id]: url }));
+    }
+    setBreed({ ...item, image: url || `/images/${item.id}.jpg` });
+  };
+
+  const identifyDog = async (file) => {
+    if (!file) return;
+    setIdentifying(true);
+    setIdentifyError(null);
+    try {
+      const mimeType = file.type || 'image/jpeg';
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = () => reject(new Error('Could not read the photo'));
+        reader.readAsDataURL(file);
+      });
+      const response = await fetch('/api/identify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType }),
+      });
+      const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      let result;
+      try { result = await response.json(); } catch { throw new Error(local ? 'Photo identification is not available in this local Vite preview yet. Deploy the project, then snap a photo on the live site.' : 'Could not identify the dog. Please try again.'); }
+      if (!response.ok) {
+        throw new Error(result?.error || 'Could not identify the dog. Please try again.');
+      }
+      if (result.id === 'none') {
+        throw new Error(local ? 'Photo identification is not available in this local Vite preview yet. Deploy the project, then snap a photo on the live site.' : 'No dog detected in that photo. Try a clearer shot of the face.');
+      }
+      const aliasId = BREED_ALIASES[result.id];
+      const match = ALL_BREEDS.find((b) => b.id === (aliasId || result.id)) || ALL_BREEDS.find((b) => b.label.toLowerCase() === (result.label || '').toLowerCase());
+      let image = null;
+      if (match) {
+        if (match.slug) image = await dogceoImage(match.slug);
+        if (image) setPhotoThumbs((prev) => ({ ...prev, [match.id]: image }));
+      }
+      const picked = { ...(match || { id: result.id, label: result.label || 'Mixed breed', risk: 'medium', slug: null }), image: image || URL.createObjectURL(file), photo: file };
+      setBreed(picked);
+    } catch (err) {
+      setIdentifyError(err.message || 'Could not identify the dog. Please try again.');
+    } finally {
+      setIdentifying(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   const setAnswer = (value) => setAnswers((prev) => ({ ...prev, [current.id]: value }));
   const submit = async () => {
@@ -73,7 +197,37 @@ export default function Assessment({ onComplete, onBack }) {
     {step === 0 ? <section className="assessment-content breed-step fade-up">
       <div className="pitbull-intro"><img src="/images/pitbull.jpg" alt="Pit bull looking at the camera" /><div><span className="kicker">Start with the truth</span><p>Do not choose the breed that makes your answer look responsible. Choose the dog you are actually considering.</p></div></div>
       <p className="kicker">The first decision</p><h1 className="q-title">Which dog are you asking us to judge your life against?</h1><p className="q-sub">There is no safe-sounding answer here. Every breed has needs. Your result depends on whether you can meet them when the excitement is gone.</p>
-      <div className="breed-grid">{BREEDS.map((item) => <button key={item.id} className={`breed-card ${breed?.id === item.id ? 'selected' : ''}`} onClick={() => setBreed(item)}><img src={`/images/${item.id}.jpg`} alt="" /><span className="breed-name">{item.label}</span><span className="breed-risk">{RISK_LABELS[item.risk]}</span></button>)}</div>
+      <div className="breed-grid">{BREEDS.map((item) => <button key={item.id} className={`breed-card ${breed?.id === item.id ? 'selected' : ''}`} onClick={() => selectBreed(item)}><img src={`/images/${item.id}.jpg`} alt="" /><span className="breed-name">{item.label}</span><span className="breed-risk">{RISK_LABELS[item.risk]}</span></button>)}</div>
+      <div className="breed-more">
+        <div className="kicker breed-more-kicker">Don't see the dog?</div>
+        <div className="breed-more-row">
+          <div className="breed-search">
+            <input className="breed-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search any breed…" />
+            {matches.length > 0 && (
+              <ul className="breed-search-list">
+                {matches.map((item) => (
+                  <li key={item.id}>
+                    <button className="breed-search-item" onClick={() => selectFromSearch(item)}>
+                      <span className="breed-search-thumb">{photoThumbs[item.id] ? <img src={photoThumbs[item.id]} alt="" /> : <span className="thumb-ph">🐾</span>}</span>
+                      <span className="breed-search-name">{item.label}</span>
+                      <span className="breed-risk">{RISK_LABELS[item.risk]}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <span className="breed-more-or">or</span>
+          <div className="identify-wrap">
+            <button className="identify-btn" disabled={identifying} onClick={() => fileRef.current?.click()}>
+              {identifying ? 'Identifying…' : '📷 Snap a photo'}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
+            {identifyError && <p className="identify-error">{identifyError}</p>}
+          </div>
+        </div>
+        {breed?.photo && <div className="identified-note">Identified from your photo: <strong>{breed.label}</strong> ✓</div>}
+      </div>
     </section> : <section className="assessment-content fade-up" key={current.id}>
       <p className="kicker">Question {step} / {QUESTIONS.length}</p><h1 className="q-title">{current.question}</h1><p className="q-sub">Pick the closest answer. Then add context if the choices do not tell the whole truth.</p>
       <div className="options-list">{current.options.map((option) => <button key={option} className={`option-btn ${answer === option ? 'selected' : ''}`} onClick={() => setAnswer(option)}>{option}</button>)}</div>

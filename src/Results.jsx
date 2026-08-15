@@ -59,6 +59,7 @@ export default function Results({ data, results, onRetake, onHome }) {
   const [speaking, setSpeaking] = useState(false);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
+  const breedImage = data?.breed?.image || (breedId ? `/images/${breedId}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg');
   const voiceScript = results.dogVoice || FALLBACK_VOICE;
 
   useEffect(() => {
@@ -106,7 +107,7 @@ export default function Results({ data, results, onRetake, onHome }) {
             <div className="verdict-label section-label" style={{ color: rec.color }}>
               {rec.label} · Gemini assessment
             </div>
-            <div className="verdict-breed"><img className="result-breed-thumb" src={`/images/${breedId}.jpg`} alt="" /> {data.breed?.label}</div>
+            <div className="verdict-breed"><img className="result-breed-thumb" src={breedImage} alt="" /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
           </div>
         </div>
@@ -116,7 +117,7 @@ export default function Results({ data, results, onRetake, onHome }) {
       <div className="dog-moment">
         <div className="dog-image-wrap">
           <img
-            src={breedId ? `/images/${breedId}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg'}
+            src={breedImage}
             alt="An adorable dog"
             className="dog-img"
             onError={e => {
