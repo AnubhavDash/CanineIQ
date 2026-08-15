@@ -109,7 +109,7 @@ Breed health information draws on public veterinary and welfare sources, includi
 
 ## The Idea
 
-This came from watching a video of an elderly woman's pitbull mauling a couple while she stood there helplessly — the dog untrained, unstimulated, kept purely as a status symbol. The dog wasn't evil. The ownership was irresponsible.
+This came from a [Times of India report about a Patiala couple](https://timesofindia.indiatimes.com/city/chandigarh/gate-opens-pitbull-attacks-how-patiala-couples-search-for-a-rental-home-turned-horrific/articleshow/133198154.cms) who went to view a rental home and were mauled by a pitbull the moment they opened the gate — a dog that kept attacking even after its owner ordered it to stop, a dog left to roam free. The dog wasn't evil. The ownership was irresponsible.
 
 The same energy drives the brachycephalic problem: French Bulldogs are the world's most popular breed, and a huge proportion of them will need palate surgery by age 3 because humans bred them to have faces that can't function.
 
@@ -117,4 +117,4 @@ CanineIQ is blunt about both of these things because the dogs deserve honesty ev
 
 ---
 
-*Built for DEV Weekend Challenge: Dog Days Edition*
+*Built for DEV Weekend Challenge: Dog Days Edition — August 2026*
