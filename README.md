@@ -29,11 +29,11 @@ CanineIQ confronts both problems directly.
 ## What It Does
 
 ### 1. Ownership Readiness Assessment
-An 8-question assessment covering living situation, experience, time, budget, training commitment, and motivation. **Google AI (Gemini)** evaluates your responses against the real demands of your chosen breed and delivers:
-- A 0–100 readiness score
+An 8-question assessment covering living situation, experience, time, budget, training commitment, and motivation. A **deterministic scoring engine** (`api/score.js`) weighs each answer against the chosen breed's documented needs (energy, space, fragility, grooming, health cost, household safety, trainability, and difficulty), then **Google AI (Gemini)** writes the personalised narrative around that fixed score. You receive:
+- A 0–100 readiness score (computed deterministically, not LLM-judged)
 - A verdict: `READY / CAUTION / NOT_READY`
-- Top warnings and genuine strengths
-- A breed alternative if you're not ready
+- Top warnings and genuine strengths (written by Gemini, tied to your answers)
+- A breed alternative if you're not ready (also computed deterministically from the breed-need table)
 
 ### 2. The Dog Speaks
 The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs — shown alongside a quick facts strip (breed, score, verdict) so the verdict is unmissable. A **"Read it to me"** button reads the letter aloud with **ElevenLabs** emotional text-to-speech (a soft, sympathetic voice with `[sighs]` delivery), falling back to the browser's built-in speech synthesis if the API is unavailable.
@@ -48,7 +48,7 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 - A healthier breed alternative
 
 ### 4. Find Any Breed by Name or Photo
-Beyond the 10 core breeds, search **31 more** (41 total) through a dropdown that lazily loads each breed's image from the [Dog CEO API](https://dog.ceo/). Or **snap a photo** of a dog and **Gemini** (multimodal) identifies the breed, auto-selecting it for the assessment.
+Beyond the 10 core breeds, search **30 more** (40 total) through a dropdown that lazily loads each breed's image from the [Dog CEO API](https://dog.ceo/). Or **snap a photo** of a dog and **Gemini** (multimodal) identifies the breed, auto-selecting it for the assessment.
 
 ---
 
@@ -60,7 +60,7 @@ Beyond the 10 core breeds, search **31 more** (41 total) through a dropdown that
 | Read-aloud voice | ElevenLabs (`eleven_v3`) with browser SpeechSynthesis fallback |
 | Breed images | Local assets (10 core breeds) + Dog CEO API (31 searchable breeds) |
 | Frontend | React 18, CSS custom properties |
-| Typography | Fraunces (display) + Inter (body) |
+| Typography | Space Grotesk (display) + DM Sans (body) |
 | Hosting | Vercel (static + serverless functions) |
 
 ---
@@ -97,7 +97,7 @@ Set these in Vercel → Settings → Environment Variables, then redeploy. Keys 
 
 ## How It Works
 
-1. **Assessment flow:** pick a breed → answer 8 questions → `api/evaluate.js` builds a detailed prompt (breed context + research notes + your answers) and calls Gemini, which returns strict JSON (score, verdict, 3 warnings, 3 strengths, a dog's letter, alternative breed, per-answer findings). Responses are validated and normalized server-side.
+1. **Assessment flow:** pick a breed → answer 8 questions → `api/score.js` computes a deterministic per-answer score (0–100) against the breed's documented needs and derives the verdict, then `api/evaluate.js` builds a detailed prompt (breed context + research notes + the computed score + your answers) and calls Gemini, which returns strict JSON (verdict sentence, 3 warnings, 3 strengths, a dog's letter, per-answer findings). Responses are validated and normalized server-side; the LLM never determines the score.
 2. **Rate-limit resilience:** the serverless functions try a chain of Gemini models, falling back if one is rate-limited — so a popular demo can't kill the app.
 3. **Photo identification:** `api/identify.js` sends the uploaded photo to Gemini's multimodal model and returns the breed slug, which is matched (with aliases) to the assessment's breed list.
 4. **Read it to me:** `api/speech.js` sends the dog's letter to ElevenLabs with an emotional voice profile and returns an MP3; the browser falls back to native speech synthesis on any failure.

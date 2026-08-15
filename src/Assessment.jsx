@@ -314,7 +314,7 @@ export default function Assessment({ onComplete, onBack }) {
         <div className="kicker breed-more-kicker">Don't see the dog?</div>
         <div className="breed-more-row">
           <div className="breed-search" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setSearchOpen(false); }}>
-            <input className="breed-search-input" value={query} onFocus={() => setSearchOpen(true)} onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }} placeholder="Search any breed…" />
+            <input className="breed-search-input" id="breed-search" name="breed-search" value={query} onFocus={() => setSearchOpen(true)} onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }} placeholder="Search any breed…" />
             {searchOpen && matches.length > 0 && (
               <ul className="breed-search-list">
                 {matches.map((item) => (
