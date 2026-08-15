@@ -238,6 +238,18 @@ export default function BreedHealth({ onBack }) {
           )}
         </div>
       </div>
+
+      <footer className="bh-sources">
+        <div className="section-label">Sources</div>
+        <p>Breed health information is drawn from public veterinary and welfare sources, including the Orthopedic Foundation for Animals (OFA), the AKC Canine Health Foundation, The Kennel Club (UK) health schemes, RSPCA brachycephalic guidance, and University of Cambridge veterinary research. Figures are shown as qualitative ranges — inherited-disease risk is line-specific — so confirm details with a veterinarian and the breeder's health-testing documentation before choosing.</p>
+        <ul>
+          <li><a href="https://www.ofa.org/" target="_blank" rel="noreferrer">Orthopedic Foundation for Animals (OFA)</a></li>
+          <li><a href="https://www.akcchf.org/" target="_blank" rel="noreferrer">AKC Canine Health Foundation</a></li>
+          <li><a href="https://www.thekennelclub.org.uk/health/" target="_blank" rel="noreferrer">The Kennel Club (UK) — Health</a></li>
+          <li><a href="https://www.rspca.org.uk/adviceandwelfare/pets/dogs/health/brachycephalic" target="_blank" rel="noreferrer">RSPCA — Brachycephalic dogs</a></li>
+          <li><a href="https://www.vet.cam.ac.uk/" target="_blank" rel="noreferrer">University of Cambridge — Veterinary research</a></li>
+        </ul>
+      </footer>
     </div>
   );
 }
