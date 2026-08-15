@@ -117,4 +117,4 @@ CanineIQ is blunt about both of these things because the dogs deserve honesty ev
 
 ---
 
-*Built for DEV Weekend Challenge: Dog Days Edition — August 2026. All commits fall within the challenge window (submissions due August 17, 2026 6:59 AM UTC).*
+*Built for DEV Weekend Challenge: Dog Days Edition — August 2026.*
