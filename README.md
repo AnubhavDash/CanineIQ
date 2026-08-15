@@ -55,7 +55,7 @@ Breed popularity, bite incident statistics, shelter surrender rates, and welfare
 ## Setup
 
 ```bash
-git clone <repo>
+git clone https://github.com/AnubhavDash/canineiq.git
 cd canineiq
 npm install
 
