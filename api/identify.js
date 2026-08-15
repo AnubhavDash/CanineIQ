@@ -1,4 +1,4 @@
-const MODEL = 'gemini-3.6-flash';
+const MODEL_CHAIN = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'];
 const API_KEY = process.env.GEMINI_API_KEY;
 
 function json(body, status = 200) {
@@ -20,6 +20,28 @@ function parseJson(text) {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+async function callModel(models, prompt, image, mimeType) {
+  const errors = [];
+  for (const model of models) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ inlineData: { mimeType, data: image } }, { text: prompt }] }],
+          generationConfig: { temperature: 0.2, max_output_tokens: 400 },
+        }),
+      });
+      if (response.ok) return response;
+      const detail = await response.text().catch(() => '');
+      errors.push(`${model} ${response.status} ${detail.slice(0, 120)}`);
+    } catch (err) {
+      errors.push(`${model} ${err.message}`);
+    }
+  }
+  throw new Error(`All Gemini models failed: ${errors.join(' | ')}`);
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'POST') {
@@ -34,18 +56,7 @@ export default {
         return json({ error: 'No image provided' }, 400);
       }
       const prompt = `You are a dog breed identifier. Look at the dog in this photo and identify the breed. Respond with ONLY the JSON object and nothing else: {"id":"<slug>","label":"<Breed Name>","confidence":"<high|medium|low>"}. id is a lowercase underscore slug (e.g. french_bulldog, golden_retriever, pitbull, labrador). Prefer a specific breed over a group. If unsure, pick the closest breed and set confidence 'low' - do NOT fall back to 'mixed' unless the dog is clearly a mix of two or more distinct breeds. If no dog is clearly visible in the image, return {"id":"none","label":"No dog detected","confidence":"low"}.`;
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ inlineData: { mimeType: mimeType || 'image/jpeg', data: image } }, { text: prompt }] }],
-          generationConfig: { temperature: 0.2, max_output_tokens: 400 },
-        }),
-      });
-      if (!response.ok) {
-        const detail = await response.text().catch(() => '');
-        throw new Error(`Gemini ${response.status} ${detail.slice(0, 200)}`);
-      }
+      const response = await callModel(MODEL_CHAIN, prompt, image, mimeType || 'image/jpeg');
       const result = parseJson(extractText(await response.json()));
       return json({ id: result.id || 'mixed', label: result.label || 'Mixed breed', confidence: result.confidence || 'low' });
     } catch (error) {

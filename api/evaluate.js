@@ -1,4 +1,4 @@
-const MODEL = 'gemini-3.6-flash';
+const MODEL_CHAIN = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'];
 const API_KEY = process.env.GEMINI_API_KEY;
 
 const BREED_RESEARCH = {
@@ -65,6 +65,29 @@ function json(body, status = 200) {
   });
 }
 
+async function callModel(models, prompt) {
+  const errors = [];
+  for (const model of models) {
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
+        body: JSON.stringify({
+          model,
+          input: prompt,
+          generation_config: { temperature: 0.45, max_output_tokens: 4200, thinking_level: 'minimal' },
+        }),
+      });
+      if (response.ok) return response;
+      const detail = await response.text().catch(() => '');
+      errors.push(`${model} ${response.status} ${detail.slice(0, 120)}`);
+    } catch (err) {
+      errors.push(`${model} ${err.message}`);
+    }
+  }
+  throw new Error(`All Gemini models failed: ${errors.join(' | ')}`);
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'POST') {
@@ -86,19 +109,7 @@ SCORING: Evaluate each of the 8 answers individually against what that answer re
 CONCERNS AND STRENGTHS: Write concrete, personalised items tied to the person's actual answers and the breed's documented needs — not a restatement of their answer and not generic advice. Each concern must name the specific answer, why it is a genuine problem for THIS breed, and the concrete risk. Each strength must name the specific answer and why it is a genuine asset for THIS breed. Do not soften, pad, or invent. BALANCE: every concern and every strength must be the SAME length — each item between 25 and 40 words, with the same sentence structure (roughly 2-3 sentences each), so the two columns render at matching heights. Never write a long concern and a short strength (or vice versa).
 
 BREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nReturn only JSON with exactly: score integer 0-100; verdict one plain-language sentence; readyFor; topWarnings array of exactly 3 concrete answer-based concerns; topStrengths array of exactly 3 concrete answer-based strengths; dogVoice a short letter of 4-6 sentences written from the dog's own perspective — intimate, gentle, quietly sad, never preachy; name the breed's real daily reality and this person's specific situation, and if they chose the breed for status or appear unprepared, let the dog say what it actually needs from them; recommendation READY, CAUTION, or NOT_READY; alternateBreed string or empty; altReasons array of 3 reasons tied to this person's answers; answerFindings array of exactly 8 objects with question, finding, concernLevel LOW/WATCH/ACTION. Never return generic filler, and never claim a statistic unless supported by the supplied context.`;
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
-        body: JSON.stringify({
-          model: MODEL,
-          input: prompt,
-          generation_config: { temperature: 0.45, max_output_tokens: 4200, thinking_level: 'minimal' },
-        }),
-      });
-      if (!response.ok) {
-        const detail = await response.text().catch(() => '');
-        throw new Error(`Gemini ${response.status} ${detail.slice(0, 200)}`);
-      }
+      const response = await callModel(MODEL_CHAIN, prompt);
       const result = normalize(parseJson(extractText(await response.json())), questions, breed);
       return json(result);
     } catch (error) {
