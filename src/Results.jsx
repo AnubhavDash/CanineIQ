@@ -82,7 +82,7 @@ export default function Results({ data, results, onRetake, onHome }) {
           <ScoreRing score={results.score} />
           <div className="verdict-text">
             <div className="verdict-label section-label" style={{ color: rec.color }}>
-              {rec.icon} {rec.label}
+              {rec.label}
             </div>
             <div className="verdict-breed"><img className="result-breed-thumb" src={`/images/${breedId}.jpg`} alt="" /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
@@ -140,7 +140,7 @@ export default function Results({ data, results, onRetake, onHome }) {
       {/* Warnings & Strengths */}
       <div className="ws-grid">
         <div className="ws-card">
-          <div className="ws-title" style={{ color: 'var(--danger)' }}>⚠ Concerns</div>
+          <div className="ws-title" style={{ color: 'var(--danger)' }}>Concerns</div>
           <ul className="ws-list">
             {results.topWarnings?.map((w, i) => (
               <li key={i} className="ws-item warning-item">{w}</li>
@@ -148,7 +148,7 @@ export default function Results({ data, results, onRetake, onHome }) {
           </ul>
         </div>
         <div className="ws-card">
-          <div className="ws-title" style={{ color: 'var(--success)' }}>✓ Strengths</div>
+          <div className="ws-title" style={{ color: 'var(--success)' }}>Strengths</div>
           <ul className="ws-list">
             {results.topStrengths?.map((s, i) => (
               <li key={i} className="ws-item strength-item">{s}</li>
@@ -156,6 +156,8 @@ export default function Results({ data, results, onRetake, onHome }) {
           </ul>
         </div>
       </div>
+
+      {results.answerFindings?.length > 0 && <section className="findings-card"><div className="section-label">What each answer tells us</div><div className="findings-list">{results.answerFindings.map((finding, index) => <article className="finding" key={`${finding.question}-${index}`}><div><span className="finding-number">{String(index + 1).padStart(2, '0')}</span><strong>{finding.question}</strong></div><p>{finding.finding}</p><span className={`finding-level level-${finding.concernLevel?.toLowerCase()}`}>{finding.concernLevel === 'ACTION' ? 'Needs action' : finding.concernLevel === 'WATCH' ? 'Worth watching' : 'Working here'}</span></article>)}</div></section>}
 
       {/* Alt breed */}
       {results.recommendation !== 'READY' && results.alternateBreed && (
