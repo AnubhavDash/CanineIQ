@@ -94,11 +94,25 @@ export default function Assessment({ onComplete, onBack }) {
     return [...BREEDS, ...MORE_BREEDS.filter((b) => !seen.has(b.id))];
   }, []);
 
+  const CORE_IDS = useMemo(() => new Set(BREEDS.map((b) => b.id)), []);
+
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
     return ALL_BREEDS.filter((b) => b.label.toLowerCase().includes(q)).slice(0, 8);
   }, [query, ALL_BREEDS]);
+
+  useEffect(() => {
+    if (!searchOpen || !query.trim()) return;
+    const timer = setTimeout(async () => {
+      const missing = matches.filter((b) => !CORE_IDS.has(b.id) && !photoThumbs[b.id]);
+      for (const b of missing) {
+        const url = await dogceoImage(b.slug);
+        if (url) setPhotoThumbs((prev) => (prev[b.id] ? prev : { ...prev, [b.id]: url }));
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchOpen, query, matches, photoThumbs, CORE_IDS]);
 
   const dogceoImage = async (slug) => {
     try {
@@ -210,7 +224,7 @@ export default function Assessment({ onComplete, onBack }) {
                 {matches.map((item) => (
                   <li key={item.id}>
                     <button className="breed-search-item" onClick={() => selectFromSearch(item)}>
-                      <span className="breed-search-thumb">{photoThumbs[item.id] ? <img src={photoThumbs[item.id]} alt="" /> : <span className="thumb-ph">🐾</span>}</span>
+                      <span className="breed-search-thumb">{CORE_IDS.has(item.id) ? <img src={`/images/${item.id}.jpg`} alt="" /> : photoThumbs[item.id] ? <img src={photoThumbs[item.id]} alt="" /> : <span className="thumb-ph">🐾</span>}</span>
                       <span className="breed-search-name">{item.label}</span>
                       <span className="breed-risk">{RISK_LABELS[item.risk]}</span>
                     </button>
