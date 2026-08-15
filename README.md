@@ -38,9 +38,6 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 ### 4. Snowflake Data Layer
 Breed popularity, bite incident statistics, shelter surrender rates, and welfare trend data stored and queried via **Snowflake Data Cloud**. Surfaces contextual data alongside AI-generated assessments.
 
-### 5. Solana Responsibility Certificate *(if READY)*
-Users who pass the readiness threshold can mint a lightweight on-chain certificate on **Solana devnet** — a proof-of-competency record that shelters or breeders could eventually use to verify responsible intent before adoption.
-
 ---
 
 ## Tech Stack
@@ -50,7 +47,6 @@ Users who pass the readiness threshold can mint a lightweight on-chain certifica
 | AI Assessment & Breed Health | Google AI (Claude Sonnet via Anthropic API) |
 | Voice Synthesis | ElevenLabs Multilingual v2 |
 | Welfare Data | Snowflake Data Cloud |
-| Responsibility Certificate | Solana (Anchor, devnet) |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
 
@@ -84,7 +80,6 @@ The Anthropic API is handled via the claude.ai artifact system (no key needed in
 - ✅ **Best Use of Google AI** — Core AI assessment engine and breed health analysis
 - ✅ **Best Use of ElevenLabs** — Dog voice synthesis on results page  
 - ✅ **Best Use of Snowflake** — Breed welfare data storage and querying
-- ✅ **Best Use of Solana** — On-chain responsible ownership certificate
 
 ---
 
