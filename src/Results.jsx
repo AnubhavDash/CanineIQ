@@ -84,7 +84,7 @@ export default function Results({ data, results, onRetake, onHome }) {
             <div className="verdict-label section-label" style={{ color: rec.color }}>
               {rec.icon} {rec.label}
             </div>
-            <div className="verdict-breed">{data.breed?.emoji} {data.breed?.label}</div>
+            <div className="verdict-breed"><img className="result-breed-thumb" src={`/images/${breedId}.jpg`} alt="" /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function Results({ data, results, onRetake, onHome }) {
 
         <div className="dog-voice-panel">
           <div className="dv-eyebrow section-label">
-            {data.breed?.emoji} {data.breed?.label} speaks
+            What this dog needs from you
           </div>
           <blockquote className="dog-voice-text">
             "{voiceScript}"

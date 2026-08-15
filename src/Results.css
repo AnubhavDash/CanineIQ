@@ -38,7 +38,7 @@
 .score-ring-wrap { flex-shrink: 0; }
 .verdict-text { flex: 1; min-width: 220px; }
 .verdict-label { margin-bottom: 8px; font-size: 11px; }
-.verdict-breed {
+.result-breed-thumb{width:42px;height:32px;object-fit:cover;vertical-align:middle;filter:saturate(.7)}.verdict-breed {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 600;
