@@ -172,7 +172,7 @@ export default function Results({ data, results, onRetake, onHome }) {
           </ul>
         </div>
         <div className="ws-card">
-          <div className="ws-title" style={{ color: 'var(--success)' }}>Strengths</div>
+          <div className="ws-title" style={{ color: 'var(--safe)' }}>Strengths</div>
           <ul className="ws-list">
             {results.topStrengths?.map((s, i) => (
               <li key={i} className="ws-item strength-item">{s}</li>
