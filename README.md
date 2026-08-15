@@ -58,7 +58,7 @@ Beyond the 10 core breeds, search **30 more** (40 total) through a dropdown that
 |-------|-----------|
 | AI Assessment & photo ID | Google AI (Gemini) via Vercel serverless functions — model fallback chain: `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite` → `gemini-3.6-flash` (rate-limit resilient) |
 | Read-aloud voice | ElevenLabs (`eleven_v3`) with browser SpeechSynthesis fallback |
-| Breed images | Local assets (10 core breeds) + Dog CEO API (31 searchable breeds) |
+| Breed images | Local assets (10 core breeds) + Dog CEO API (30 searchable breeds) |
 | Frontend | React 18, CSS custom properties |
 | Typography | Space Grotesk (display) + DM Sans (body) |
 | Hosting | Vercel (static + serverless functions) |
