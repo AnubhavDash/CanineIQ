@@ -129,6 +129,11 @@ const DEMO_RESULT = (breedLabel, risk) => ({
   dogVoice: "I look cute, don't I? But look closer — every breath is a small fight for me. I didn't choose this face, and I can't tell you how tired I get just trying to sleep at night. If you take me home, promise me you'll learn what I actually need. That's all I've ever wanted.",
   recommendation: risk === 'low' ? 'READY' : 'CAUTION',
   alternateBreed: risk === 'low' ? '' : 'Labrador Retriever',
+  altReasons: [
+    'Labradors are famously patient with first-time owners — far less demanding to live with',
+    'Much lower bite-incident history, so less stress and liability for you and your family',
+    'Their exercise and training needs match your current schedule far more realistically',
+  ],
 });
 
 export default function Assessment({ onComplete, onBack }) {
@@ -189,7 +194,8 @@ Please provide an honest, no-fluff welfare assessment. Respond in this exact JSO
   "topStrengths": ["<genuine strength 1>", "<genuine strength 2>"],
   "dogVoice": "<CRITICAL: This is the most important field. Write 4-6 sentences spoken in first person as the ${breedInfo?.label}. The person will see a photo of an adorable puppy next to this text, then hear it read aloud in a soft, sad voice. The emotional contrast is the point. Start with something that acknowledges how cute and loveable the dog is — then pivot to the truth with quiet devastation, not anger. If they have a flat face (French Bulldog, Pug, Bulldog): open with 'I look cute, don't I?' then describe the sound of struggling to breathe, that they didn't choose this face, that every night is a fight for air. If they chose the breed for status: gently, heartbreakingly ask if they've ever thought what happens to you when you stop being a status symbol. If they're not ready: describe what abandonment feels like from the dog's perspective — the confusion, waiting at the door. End every voice with one line of what the dog actually needs that has nothing to do with how they look. Write this as something that makes a person stop scrolling. No clichés. No poetry. Just the quiet truth a dog would tell you if it could talk.">",
   "recommendation": "<'READY' | 'CAUTION' | 'NOT_READY'>",
-  "alternateBreed": "<only if NOT_READY or CAUTION, suggest a breed that better fits their lifestyle>"
+  "alternateBreed": "<only if NOT_READY or CAUTION, suggest a breed that better fits their lifestyle>",
+  "altReasons": ["<reason 1 why alternateBreed fits their life better than their first choice>", "<reason 2>", "<reason 3>"]
 }
 
 Only respond with valid JSON, no extra text.`;

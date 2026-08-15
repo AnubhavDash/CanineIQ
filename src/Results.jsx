@@ -54,6 +54,7 @@ function ScoreRing({ score }) {
 
 export default function Results({ data, results, onRetake, onHome }) {
   const [playing, setPlaying] = useState(false);
+  const [showAltReasons, setShowAltReasons] = useState(false);
   const audioRef = useRef(null);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
@@ -93,7 +94,7 @@ export default function Results({ data, results, onRetake, onHome }) {
       <div className="dog-moment">
         <div className="dog-image-wrap">
           <img
-            src={`https://placedog.net/600/400?id=${Math.floor(Math.random() * 50) + 1}`}
+            src={breedId ? `/images/${breedId}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg'}
             alt="An adorable dog"
             className="dog-img"
             onError={e => {
@@ -133,10 +134,6 @@ export default function Results({ data, results, onRetake, onHome }) {
             preload="none"
             onEnded={() => setPlaying(false)}
           />
-
-          <div className="voice-note">
-            A real voice · pre-recorded, so no API is called to hear it
-          </div>
         </div>
       </div>
 
@@ -168,6 +165,19 @@ export default function Results({ data, results, onRetake, onHome }) {
           <p className="alt-breed-sub">
             Start here. Build experience. Come back when you're ready for your first choice.
           </p>
+          <button
+            className="btn-ghost alt-why-btn"
+            onClick={() => setShowAltReasons(v => !v)}
+          >
+            {showAltReasons ? 'Hide reasons ↑' : `Why this breed instead of ${data.breed?.label}? ↓`}
+          </button>
+          {showAltReasons && results.altReasons?.length > 0 && (
+            <ul className="alt-reasons fade-up">
+              {results.altReasons.map((r, i) => (
+                <li key={i} className="alt-reason-item">{r}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

@@ -230,6 +230,28 @@
   margin: 8px 0 10px;
 }
 .alt-breed-sub { font-size: 14px; line-height: 1.6; color: var(--muted); }
+.alt-why-btn { margin-top: 20px; font-size: 13px; }
+.alt-reasons {
+  list-style: none;
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.alt-reason-item {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--cream2);
+  padding-left: 18px;
+  position: relative;
+}
+.alt-reason-item::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+  font-weight: 700;
+}
 
 .results-actions {
   display: flex;
