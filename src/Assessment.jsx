@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './Assessment.css';
+import { LIVE_MODE, GEMINI_API_KEY } from './config.js';
+import { callGemini } from './gemini.js';
 
 const BREEDS = [
   { id: 'pitbull', label: 'Pitbull / American Staffordshire', risk: 'high', emoji: '🐕' },
@@ -111,6 +113,24 @@ const RISK_LABELS = {
   low: 'Beginner Friendly',
 };
 
+const DEMO_RESULT = (breedLabel, risk) => ({
+  score: risk === 'low' ? 78 : risk === 'health' ? 52 : 41,
+  verdict: "I've seen how you live your life, and I'd still choose you — but only if you're ready to change for me.",
+  readyFor: breedLabel,
+  topWarnings: [
+    'Daily exercise and mental stimulation are non-negotiable, not optional extras',
+    'Vet, food, and insurance costs will be higher than you may have budgeted',
+    'This breed needs consistent, patient training from day one',
+  ],
+  topStrengths: [
+    'You are honest about your situation — that is already half of being a good owner',
+    'You are willing to ask for help instead of guessing',
+  ],
+  dogVoice: "I look cute, don't I? But look closer — every breath is a small fight for me. I didn't choose this face, and I can't tell you how tired I get just trying to sleep at night. If you take me home, promise me you'll learn what I actually need. That's all I've ever wanted.",
+  recommendation: risk === 'low' ? 'READY' : 'CAUTION',
+  alternateBreed: risk === 'low' ? '' : 'Labrador Retriever',
+});
+
 export default function Assessment({ onComplete, onBack }) {
   const [step, setStep] = useState(0); // 0 = breed select, 1..N = questions, N+1 = loading
   const [breed, setBreed] = useState(null);
@@ -175,20 +195,14 @@ Please provide an honest, no-fluff welfare assessment. Respond in this exact JSO
 Only respond with valid JSON, no extra text.`;
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await response.json();
-      const text = data.content?.find(b => b.type === 'text')?.text || '';
-      const clean = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
+      let parsed;
+      if (LIVE_MODE && GEMINI_API_KEY) {
+        const text = await callGemini(prompt);
+        parsed = JSON.parse(text);
+      } else {
+        await new Promise(r => setTimeout(r, 1200));
+        parsed = DEMO_RESULT(breedInfo?.label, breedInfo?.risk);
+      }
 
       onComplete({ breed: breedInfo, answers }, parsed);
     } catch (err) {

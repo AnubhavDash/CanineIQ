@@ -17,14 +17,14 @@ CanineIQ confronts both problems directly.
 ## What It Does
 
 ### 1. Ownership Readiness Assessment
-8-question assessment covering living situation, experience, time, budget, training commitment, and motivation. Google AI (via Claude Sonnet) evaluates your responses against the real demands of your chosen breed and delivers:
+8-question assessment covering living situation, experience, time, budget, training commitment, and motivation. **Google AI (Gemini)** evaluates your responses against the real demands of your chosen breed and delivers:
 - A 0–100 readiness score
 - A verdict: `READY / CAUTION / NOT_READY`
 - Top warnings and genuine strengths
 - A breed alternative if you're not ready
 
-### 2. The Dog Speaks (ElevenLabs)
-The signature feature: your result includes a 3–4 sentence message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs. This text is synthesised via **ElevenLabs TTS** and played back in a deep, resonant voice.
+### 2. The Dog Speaks
+The signature feature: your result includes a 3–4 sentence message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs.
 
 ### 3. Breed Health Transparency
 An honest breakdown of genetic health problems in 8 popular breeds — French Bulldogs, Pugs, English Bulldogs, Cavalier King Charles Spaniels, and more. Powered by **Google AI**:
@@ -44,8 +44,7 @@ Breed popularity, bite incident statistics, shelter surrender rates, and welfare
 
 | Layer | Technology |
 |-------|-----------|
-| AI Assessment & Breed Health | Google AI (Claude Sonnet via Anthropic API) |
-| Voice Synthesis | ElevenLabs Multilingual v2 |
+| AI Assessment & Breed Health | Google AI (Gemini) |
 | Welfare Data | Snowflake Data Cloud |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
@@ -62,23 +61,23 @@ npm install
 cp .env.example .env
 # Fill in your API keys in .env
 
-npm start
+npm run dev
 ```
 
 ### Environment Variables
 
 ```
-REACT_APP_ELEVENLABS_API_KEY=   # For dog voice TTS
+VITE_GEMINI_API_KEY=       # Google AI (Gemini) — assessment & breed health
+VITE_LIVE_MODE=false       # false = demo data (no API calls), true = live APIs
 ```
 
-The Anthropic API is handled via the claude.ai artifact system (no key needed in that context). For standalone deployment, add your own Anthropic key in `Assessment.js` and `BreedHealth.js`.
+Set `VITE_LIVE_MODE=true` in `.env` once you want to hit the live Gemini API. Keys are gitignored and never committed.
 
 ---
 
 ## Prize Categories
 
 - ✅ **Best Use of Google AI** — Core AI assessment engine and breed health analysis
-- ✅ **Best Use of ElevenLabs** — Dog voice synthesis on results page  
 - ✅ **Best Use of Snowflake** — Breed welfare data storage and querying
 
 ---

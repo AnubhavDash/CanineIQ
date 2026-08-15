@@ -86,7 +86,7 @@ export default function Landing({ onStartAssessment, onBreedHealth }) {
 
       <footer className="landing-footer">
         <span>CanineIQ — Built for <a href="https://dev.to/challenges/weekend-2026-08-13" target="_blank" rel="noreferrer">DEV Weekend Challenge: Dog Days Edition</a></span>
-        <span className="footer-tech">Powered by Google AI · ElevenLabs · Snowflake · Solana</span>
+        <span className="footer-tech">Powered by Google AI · Snowflake</span>
       </footer>
     </div>
   );

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './BreedHealth.css';
+import { LIVE_MODE, GEMINI_API_KEY } from './config.js';
+import { callGemini } from './gemini.js';
 
 const HEALTH_BREEDS = [
   {
@@ -90,6 +92,17 @@ const SEV_CONFIG = {
   medium: { color: '#E8A847', label: 'Moderate', bg: 'rgba(232,168,71,0.1)' },
 };
 
+const DEMO_DETAIL = (breed) => ({
+  breed,
+  overview: `Human breeders spent generations selecting for a look that comes with ${breed.conditionFull.toLowerCase()} built in. The trait is prized by buyers and paid for by ${breed.name}s every single day of their lives.`,
+  whatItFeelsLike: `Every breath is work. Every morning starts exhausted. It is a constant, quiet discomfort the dog cannot explain and cannot escape.`,
+  surgeryRate: '~40%',
+  lifeExpectancy: '8–10 yrs',
+  whatBreedersWontTellYou: `They will show you the puppy's parents and hide the operating table those parents will need.`,
+  isItEthicalToBuy: 'No — adopting or choosing a healthier breed is the honest option.',
+  healthierAlternative: 'A mixed-breed rescue with a compatible temperament.',
+});
+
 export default function BreedHealth({ onBack }) {
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -120,20 +133,14 @@ Respond in this exact JSON format:
 Only respond with valid JSON.`;
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await response.json();
-      const text = data.content?.find(b => b.type === 'text')?.text || '';
-      const clean = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
+      let parsed;
+      if (LIVE_MODE && GEMINI_API_KEY) {
+        const text = await callGemini(prompt);
+        parsed = JSON.parse(text);
+      } else {
+        await new Promise(r => setTimeout(r, 1100));
+        parsed = DEMO_DETAIL(breed);
+      }
       setDetail({ breed, ...parsed });
     } catch (e) {
       setError('Failed to load breed health data. Please try again.');

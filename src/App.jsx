@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Landing from './components/Landing';
-import Assessment from './components/Assessment';
-import Results from './components/Results';
-import BreedHealth from './components/BreedHealth';
+import Landing from './Landing.jsx';
+import Assessment from './Assessment.jsx';
+import Results from './Results.jsx';
+import BreedHealth from './BreedHealth.jsx';
 import './App.css';
 
 export const VIEWS = {
