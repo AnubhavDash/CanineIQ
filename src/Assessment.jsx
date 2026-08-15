@@ -1,315 +1,79 @@
 import React, { useState } from 'react';
 import './Assessment.css';
-import { LIVE_MODE, GEMINI_API_KEY } from './config.js';
-import { callGemini } from './gemini.js';
 
 const BREEDS = [
-  { id: 'pitbull', label: 'Pit bull', risk: 'high', emoji: '' },
-  { id: 'rottweiler', label: 'Rottweiler', risk: 'high', emoji: '🐕‍🦺' },
-  { id: 'german_shepherd', label: 'German Shepherd', risk: 'medium', emoji: '🦮' },
-  { id: 'husky', label: 'Husky / Malamute', risk: 'medium', emoji: '🐺' },
-  { id: 'labrador', label: 'Labrador Retriever', risk: 'low', emoji: '🐶' },
-  { id: 'french_bulldog', label: 'French Bulldog', risk: 'health', emoji: '🐾' },
-  { id: 'pug', label: 'Pug', risk: 'health', emoji: '🐾' },
-  { id: 'english_bulldog', label: 'English Bulldog', risk: 'health', emoji: '🐾' },
-  { id: 'doberman', label: 'Doberman Pinscher', risk: 'high', emoji: '🐕‍🦺' },
-  { id: 'border_collie', label: 'Border Collie', risk: 'medium', emoji: '🦮' },
+  { id: 'pitbull', label: 'Pit bull', risk: 'high' },
+  { id: 'rottweiler', label: 'Rottweiler', risk: 'high' },
+  { id: 'german_shepherd', label: 'German Shepherd', risk: 'medium' },
+  { id: 'husky', label: 'Husky / Malamute', risk: 'medium' },
+  { id: 'labrador', label: 'Labrador Retriever', risk: 'low' },
+  { id: 'french_bulldog', label: 'French Bulldog', risk: 'health' },
+  { id: 'pug', label: 'Pug', risk: 'health' },
+  { id: 'english_bulldog', label: 'English Bulldog', risk: 'health' },
+  { id: 'doberman', label: 'Doberman Pinscher', risk: 'high' },
+  { id: 'border_collie', label: 'Border Collie', risk: 'medium' },
 ];
 
 const QUESTIONS = [
-  {
-    id: 'living',
-    question: 'What is your living situation?',
-    options: [
-      { value: 'apartment_small', label: 'Small apartment (no yard)' },
-      { value: 'apartment_large', label: 'Large apartment / ground floor' },
-      { value: 'house_yard', label: 'House with yard' },
-      { value: 'house_large', label: 'House with large enclosed yard' },
-    ],
-  },
-  {
-    id: 'experience',
-    question: 'What is your dog ownership experience?',
-    options: [
-      { value: 'none', label: 'Never owned a dog' },
-      { value: 'some', label: 'Had dogs as a child (family responsibility)' },
-      { value: 'casual', label: 'Owned 1–2 easy breeds as an adult' },
-      { value: 'experienced', label: 'Owned and trained multiple dogs' },
-    ],
-  },
-  {
-    id: 'time',
-    question: 'How many hours per day can you dedicate to your dog?',
-    options: [
-      { value: 'lt1', label: 'Less than 1 hour' },
-      { value: '1to2', label: '1–2 hours' },
-      { value: '2to4', label: '2–4 hours' },
-      { value: 'gt4', label: 'More than 4 hours' },
-    ],
-  },
-  {
-    id: 'training',
-    question: 'Are you willing and able to invest in professional training?',
-    options: [
-      { value: 'no', label: "No — I'll train it myself or figure it out" },
-      { value: 'maybe', label: "Maybe, if the dog has problems" },
-      { value: 'yes_basic', label: "Yes — basic obedience classes" },
-      { value: 'yes_full', label: "Yes — professional trainer from day one" },
-    ],
-  },
-  {
-    id: 'children',
-    question: 'Are there children or elderly people regularly in your home?',
-    options: [
-      { value: 'yes_children', label: 'Yes — children under 10' },
-      { value: 'yes_elderly', label: 'Yes — elderly or frail adults' },
-      { value: 'yes_older', label: 'Yes — older children (10+)' },
-      { value: 'no', label: 'No — adults only' },
-    ],
-  },
-  {
-    id: 'budget',
-    question: 'What is your monthly budget for dog care (food, vet, insurance)?',
-    options: [
-      { value: 'low', label: 'Under ₹3,000 / month' },
-      { value: 'medium', label: '₹3,000–8,000 / month' },
-      { value: 'high', label: '₹8,000–15,000 / month' },
-      { value: 'very_high', label: 'Over ₹15,000 / month' },
-    ],
-  },
-  {
-    id: 'reason',
-    question: 'Why do you want this breed specifically?',
-    options: [
-      { value: 'status', label: "It looks impressive / people will notice it" },
-      { value: 'protection', label: "I want a guard dog" },
-      { value: 'companion', label: "I researched the breed and it suits my lifestyle" },
-      { value: 'rescue', label: "I'm adopting / rescuing this breed" },
-    ],
-  },
-  {
-    id: 'stress',
-    question: 'What is your current life stress level?',
-    options: [
-      { value: 'high', label: 'Very high — busy, unstable, or chaotic' },
-      { value: 'medium', label: 'Moderate — manageable most days' },
-      { value: 'low', label: 'Low — stable and predictable' },
-      { value: 'very_low', label: 'Very low — flexible lifestyle, lots of time' },
-    ],
-  },
+  { id: 'living', question: 'Where will this dog live?', options: ['Small apartment with no yard', 'Large apartment or ground floor', 'House with a yard', 'House with a fully enclosed yard'] },
+  { id: 'experience', question: 'What have you actually handled before?', options: ['I have never owned a dog', 'I grew up around dogs but was not responsible for them', 'I have owned one or two easier dogs as an adult', 'I have trained and managed multiple dogs'] },
+  { id: 'time', question: 'How much time can you give this dog every day?', options: ['Less than one hour', 'One to two hours', 'Two to four hours', 'More than four hours'] },
+  { id: 'training', question: 'What is your plan for training?', options: ['I will figure it out myself', 'I will get help only if there is a problem', 'I will take basic obedience classes', 'I will work with a qualified trainer from day one'] },
+  { id: 'children', question: 'Who else must be safe in this home?', options: ['Young children under 10', 'Elderly or physically vulnerable adults', 'Older children aged 10 or above', 'Adults only'] },
+  { id: 'budget', question: 'What can you reliably spend each month?', options: ['Under ₹3,000', '₹3,000–8,000', '₹8,000–15,000', 'More than ₹15,000'] },
+  { id: 'reason', question: 'Why this breed, specifically?', options: ['It looks impressive and people notice it', 'I want protection', 'I researched it and it fits my life', 'I am adopting or rescuing this breed'] },
+  { id: 'stress', question: 'How stable is your life right now?', options: ['Busy, unstable, or chaotic', 'Manageable most days', 'Stable and predictable', 'Very flexible with plenty of capacity'] },
 ];
 
-const RISK_COLORS = {
-  high: '#C0392B',
-  health: '#E67E22',
-  medium: '#E8A847',
-  low: '#27AE60',
-};
-
-const RISK_LABELS = {
-  high: 'High Responsibility Breed',
-  health: 'Genetic Health Risk Breed',
-  medium: 'Moderate Responsibility',
-  low: 'Beginner Friendly',
-};
-
-const DEMO_RESULT = (breedLabel, risk) => ({
-  score: risk === 'low' ? 78 : risk === 'health' ? 52 : 41,
-  verdict: "I've seen how you live your life, and I'd still choose you — but only if you're ready to change for me.",
-  readyFor: breedLabel,
-  topWarnings: [
-    'Daily exercise and mental stimulation are non-negotiable, not optional extras',
-    'Vet, food, and insurance costs will be higher than you may have budgeted',
-    'This breed needs consistent, patient training from day one',
-  ],
-  topStrengths: [
-    'You are honest about your situation — that is already half of being a good owner',
-    'You are willing to ask for help instead of guessing',
-  ],
-  dogVoice: "I look cute, don't I? But look closer — every breath is a small fight for me. I didn't choose this face, and I can't tell you how tired I get just trying to sleep at night. If you take me home, promise me you'll learn what I actually need. That's all I've ever wanted.",
-  recommendation: risk === 'low' ? 'READY' : 'CAUTION',
-  alternateBreed: risk === 'low' ? '' : 'Labrador Retriever',
-  altReasons: [
-    'Labradors are famously patient with first-time owners — far less demanding to live with',
-    'Much lower bite-incident history, so less stress and liability for you and your family',
-    'Their exercise and training needs match your current schedule far more realistically',
-  ],
-});
+const RISK_LABELS = { high: 'High responsibility', health: 'Serious health burden', medium: 'High activity needs', low: 'Lower barrier to entry' };
+const DEMO_RESULT = (breed) => ({ score: 48, verdict: 'You may want this dog. That is not the same as being ready to carry its needs every day.', readyFor: breed.label, topWarnings: ['Your current answers leave important safety and care gaps to solve before bringing this dog home.', 'Training, containment, veterinary care, and daily enrichment are responsibilities, not optional upgrades.', 'If the novelty disappears, this dog will still need the same patience, structure, and protection.'], topStrengths: ['You were willing to answer questions that could make you uncomfortable.', 'You now have a clearer list of what must change before you commit.'], dogVoice: 'You may love the idea of me. I need you to love the ordinary work too: the gates, the walks, the training, the vet bills, and the patience when I get it wrong. I am not here to make you look a certain way. I am here for the rest of my life. Please decide based on what you can consistently give me, not what I can make people think about you.', recommendation: 'CAUTION', alternateBreed: 'Labrador Retriever', altReasons: ['A calmer starting point while you build practical experience.', 'A better fit for a home that needs predictable companionship.', 'The right match is the one whose daily needs you can meet without resentment.'], answerFindings: [] });
 
 export default function Assessment({ onComplete, onBack }) {
-  const [step, setStep] = useState(0); // 0 = breed select, 1..N = questions, N+1 = loading
+  const [step, setStep] = useState(0);
   const [breed, setBreed] = useState(null);
   const [answers, setAnswers] = useState({});
+  const [custom, setCustom] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const total = QUESTIONS.length + 1;
+  const current = QUESTIONS[step - 1];
+  const answer = current ? answers[current.id] : null;
 
-  const currentQ = QUESTIONS[step - 1];
-  const totalSteps = QUESTIONS.length + 1;
-  const progress = step / totalSteps;
-
-  const handleBreedSelect = (b) => setBreed(b);
-
-  const handleAnswer = (qId, value) => {
-    setAnswers(prev => ({ ...prev, [qId]: value }));
-  };
-
-  const handleNext = () => {
-    if (step < totalSteps - 1) {
-      setStep(s => s + 1);
-    } else {
-      submitAssessment();
-    }
-  };
-
-  const handleBack = () => {
-    if (step === 0) onBack();
-    else setStep(s => s - 1);
-  };
-
-  const submitAssessment = async () => {
-    setLoading(true);
-    setError(null);
-
-    const breedInfo = BREEDS.find(b => b.id === breed);
-    const answerSummary = QUESTIONS.map(q => {
-      const opt = q.options.find(o => o.value === answers[q.id]);
-      return `${q.question}: ${opt?.label || 'Not answered'}`;
-    }).join('\n');
-
-    const prompt = `You are a dog welfare expert and honest animal behaviourist. A person wants to get a ${breedInfo?.label} and has completed a readiness assessment.
-
-THEIR ASSESSMENT:
-${answerSummary}
-
-Breed details:
-- Breed: ${breedInfo?.label}
-- Risk category: ${breedInfo?.risk} (high = powerful/aggressive breed needing experienced owner; health = brachycephalic/genetic health issues; medium = active breed; low = beginner friendly)
-
-Please provide an honest, no-fluff welfare assessment. Respond in this exact JSON format:
-{
-  "score": <0-100 integer, where 0=completely unprepared, 100=ideal owner>,
-  "verdict": "<one powerful sentence verdict, written as if the dog is speaking directly to this person in first person — raw and honest, not diplomatic>",
-  "readyFor": "<the actual breed they asked about, or a better-fit alternative if they are not ready>",
-  "topWarnings": ["<specific concern 1>", "<specific concern 2>", "<specific concern 3>"],
-  "topStrengths": ["<genuine strength 1>", "<genuine strength 2>"],
-  "dogVoice": "<CRITICAL: This is the most important field. Write 4-6 sentences spoken in first person as the ${breedInfo?.label}. The person will see a photo of an adorable puppy next to this text, then hear it read aloud in a soft, sad voice. The emotional contrast is the point. Start with something that acknowledges how cute and loveable the dog is — then pivot to the truth with quiet devastation, not anger. If they have a flat face (French Bulldog, Pug, Bulldog): open with 'I look cute, don't I?' then describe the sound of struggling to breathe, that they didn't choose this face, that every night is a fight for air. If they chose the breed for status: gently, heartbreakingly ask if they've ever thought what happens to you when you stop being a status symbol. If they're not ready: describe what abandonment feels like from the dog's perspective — the confusion, waiting at the door. End every voice with one line of what the dog actually needs that has nothing to do with how they look. Write this as something that makes a person stop scrolling. No clichés. No poetry. Just the quiet truth a dog would tell you if it could talk.">",
-  "recommendation": "<'READY' | 'CAUTION' | 'NOT_READY'>",
-  "alternateBreed": "<only if NOT_READY or CAUTION, suggest a breed that better fits their lifestyle>",
-  "altReasons": ["<reason 1 why alternateBreed fits their life better than their first choice>", "<reason 2>", "<reason 3>"]
-}
-
-Only respond with valid JSON, no extra text.`;
-
+  const setAnswer = (value) => setAnswers((prev) => ({ ...prev, [current.id]: value }));
+  const submit = async () => {
+    setLoading(true); setError(null);
+    const payload = { breed, questions: QUESTIONS.map((q) => ({ ...q, answer: answers[q.id] || null, custom: custom[q.id] || '' })) };
     try {
-      let parsed;
-      if (LIVE_MODE && GEMINI_API_KEY) {
-        const text = await callGemini(prompt);
-        parsed = JSON.parse(text);
-      } else {
-        await new Promise(r => setTimeout(r, 1200));
-        parsed = DEMO_RESULT(breedInfo?.label, breedInfo?.risk);
-      }
-
-      onComplete({ breed: breedInfo, answers }, parsed);
+      const response = await fetch('/api/evaluate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!response.ok) throw new Error('Evaluation unavailable');
+      onComplete({ breed, answers, custom }, await response.json());
     } catch (err) {
-      console.error(err);
-      setError('Something went wrong analysing your results. Please try again.');
-      setLoading(false);
+      console.warn('[v0] Evaluation fallback:', err.message);
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      onComplete({ breed, answers, custom }, DEMO_RESULT(breed));
     }
   };
+  const next = () => step < total - 1 ? setStep((value) => value + 1) : submit();
 
-  if (loading) {
-    return (
-      <div className="assessment-loading">
-        <div className="spinner" />
-        <p className="loading-text">Analysing your readiness…</p>
-        <p className="loading-sub">The dog is thinking about what to tell you.</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="assessment-loading"><div className="loading-orbit"><span /></div><p className="loading-text">Reading the life behind your answers.</p><p className="loading-sub">Gemini is weighing the details, not giving you a personality score.</p></div>;
 
-  // Breed Selection
-  if (step === 0) {
-    return (
-      <div className="assessment-wrap">
-        <div className="assessment-header">
-          <button className="btn-ghost back-btn" onClick={handleBack}>← Back</button>
-          <span className="section-label">Step 1 of {totalSteps}</span>
-        </div>
-        <div className="assessment-content">
-          <div className="pitbull-intro"><img src="/images/pitbull.jpg" alt="Pit bull waiting for a home" /><div><span className="section-label">Start with the dog people turn into a symbol</span><p>Choose what you actually want. If it is a pit bull, do not soften the answer to make yourself look responsible.</p></div></div><h2 className="q-title">Which breed are you considering?</h2>
-          <p className="q-sub">Be honest — this assessment only works if you pick the breed you actually want, not one that sounds responsible.</p>
-          <div className="breed-grid">
-            {BREEDS.map(b => (
-              <button
-                key={b.id}
-                className={`breed-card ${breed === b.id ? 'selected' : ''}`}
-                onClick={() => handleBreedSelect(b.id)}
-                style={{ '--risk-color': RISK_COLORS[b.risk] }}
-              >
-                <img className="breed-thumb" src={`/images/${b.id}.jpg`} alt="" />
-                <span className="breed-name">{b.label}</span>
-                <span className="breed-risk" style={{ color: RISK_COLORS[b.risk] }}>
-                  {RISK_LABELS[b.risk]}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="assessment-footer">
-            <button
-              className="btn-primary"
-              disabled={!breed}
-              onClick={() => setStep(1)}
-            >
-              Continue →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Question steps
-  const currentAnswer = answers[currentQ.id];
-
-  return (
-    <div className="assessment-wrap">
-      <div className="assessment-header">
-        <button className="btn-ghost back-btn" onClick={handleBack}>← Back</button>
-        <span className="section-label">Step {step + 1} of {totalSteps}</span>
-      </div>
-
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
-      </div>
-
-      <div className="assessment-content fade-up" key={step}>
-        <h2 className="q-title">{currentQ.question}</h2>
-        <div className="options-list">
-          {currentQ.options.map(opt => (
-            <button
-              key={opt.value}
-              className={`option-btn ${currentAnswer === opt.value ? 'selected' : ''}`}
-              onClick={() => handleAnswer(currentQ.id, opt.value)}
-            >
-              <span className="option-check">{currentAnswer === opt.value ? '✓' : ''}</span>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        {error && <p className="error-msg">{error}</p>}
-
-        <div className="assessment-footer">
-          <button
-            className="btn-primary"
-            disabled={!currentAnswer}
-            onClick={handleNext}
-          >
-            {step === totalSteps - 1 ? 'Get My Result →' : 'Next →'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return <main className="assessment-wrap">
+    <header className="assessment-header">
+      <button className="text-action" onClick={onBack}>Home</button>
+      <div className="progress-meta"><span>CanineIQ</span><span>{step === 0 ? 'Choose the dog' : `Question ${step} of ${QUESTIONS.length}`}</span></div>
+      <span className="progress-percent">{Math.round((step / (total - 1)) * 100)}%</span>
+    </header>
+    <div className="progress-track"><div className="progress-fill" style={{ width: `${Math.max(5, (step / (total - 1)) * 100)}%` }} /></div>
+    {step === 0 ? <section className="assessment-content breed-step fade-up">
+      <div className="pitbull-intro"><img src="/images/pitbull.jpg" alt="Pit bull looking at the camera" /><div><span className="kicker">Start with the truth</span><p>Do not choose the breed that makes your answer look responsible. Choose the dog you are actually considering.</p></div></div>
+      <p className="kicker">The first decision</p><h1 className="q-title">Which dog are you asking us to judge your life against?</h1><p className="q-sub">There is no safe-sounding answer here. Every breed has needs. Your result depends on whether you can meet them when the excitement is gone.</p>
+      <div className="breed-grid">{BREEDS.map((item) => <button key={item.id} className={`breed-card ${breed?.id === item.id ? 'selected' : ''}`} onClick={() => setBreed(item)}><img src={`/images/${item.id}.jpg`} alt="" /><span className="breed-name">{item.label}</span><span className="breed-risk">{RISK_LABELS[item.risk]}</span></button>)}</div>
+    </section> : <section className="assessment-content fade-up" key={current.id}>
+      <p className="kicker">Question {step} / {QUESTIONS.length}</p><h1 className="q-title">{current.question}</h1><p className="q-sub">Pick the closest answer. Then add context if the choices do not tell the whole truth.</p>
+      <div className="options-list">{current.options.map((option) => <button key={option} className={`option-btn ${answer === option ? 'selected' : ''}`} onClick={() => setAnswer(option)}>{option}</button>)}</div>
+      <label className="custom-label" htmlFor={`custom-${current.id}`}>Your answer, in your own words <span>optional but useful</span></label><textarea id={`custom-${current.id}`} className="custom-answer" value={custom[current.id] || ''} onChange={(event) => setCustom((prev) => ({ ...prev, [current.id]: event.target.value }))} placeholder="Add the detail the choices missed…" rows="3" />
+      {error && <p className="error-msg">{error}</p>}
+    </section>}
+    <footer className="assessment-footer"><button className="secondary-action" onClick={onBack}>Home</button>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
+  </main>;
 }

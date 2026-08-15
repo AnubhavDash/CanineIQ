@@ -177,7 +177,7 @@ Only respond with valid JSON.`;
                 onClick={() => handleSelectBreed(b)}
                 style={selected === b.id ? { borderColor: sev.color, background: sev.bg } : {}}
               >
-                <span className="bh-emoji">{b.emoji}</span>
+                <span className="bh-index">{String(HEALTH_BREEDS.indexOf(b) + 1).padStart(2, '0')}</span>
                 <div className="bh-info">
                   <span className="bh-name">{b.name}</span>
                   <span className="bh-condition">{b.condition}</span>
@@ -192,7 +192,7 @@ Only respond with valid JSON.`;
         <div className="bh-detail">
           {!selected && (
             <div className="bh-placeholder">
-              <div className="ph-icon">🔬</div>
+              <div className="ph-icon" aria-hidden="true">+</div>
               <p>Select a breed to see the full health breakdown</p>
             </div>
           )}
@@ -211,7 +211,7 @@ Only respond with valid JSON.`;
           {detail && !loading && (
             <div className="bh-detail-card fade-up">
               <div className="detail-header">
-                <span className="detail-emoji">{detail.breed.emoji}</span>
+                <span className="detail-index" aria-hidden="true">{String(HEALTH_BREEDS.findIndex((item) => item.id === detail.breed.id) + 1).padStart(2, '0')}</span>
                 <div>
                   <h2 className="detail-name">{detail.breed.name}</h2>
                   <div className="detail-condition">{detail.breed.conditionFull}</div>
@@ -243,7 +243,7 @@ Only respond with valid JSON.`;
 
               <div className="detail-block secret">
                 <div className="detail-block-label" style={{ color: 'var(--warning)' }}>
-                  ⚠ What breeders won't tell you
+                  What breeders won't tell you
                 </div>
                 <p>{detail.whatBreedersWontTellYou}</p>
               </div>
