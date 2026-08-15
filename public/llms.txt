@@ -1,0 +1,19 @@
+# CanineIQ
+
+CanineIQ is a dog welfare intervention and breed health transparency tool. It runs an 8-question ownership-readiness assessment that scores how well a person's living situation, experience, time, budget, training plan, and motivation match the documented needs of the breed they want — then writes a personalised evaluation, including a letter from the dog's perspective.
+
+## Core pages
+
+- [Home](https://canineiq.vercel.app/): start the 8-question readiness assessment
+- [Breed Health](https://canineiq.vercel.app/#/health): documented genetic health problems in 8 popular breeds, sourced from veterinary and welfare bodies
+
+## How the assessment works
+
+- Scoring is deterministic: each of the 8 answers is weighed against the chosen breed's documented needs (energy, space, fragility, grooming, health cost, household safety, trainability, difficulty).
+- Verdicts: READY (70+), CAUTION (40+), NOT_READY (below 40).
+- Gemini writes the personalised narrative (concerns, strengths, the dog's letter) around the fixed score — it never determines the score.
+- A breed alternative is also computed deterministically from the breed-need table when the person is not ready.
+
+## Data sources
+
+Breed health information draws on public veterinary and welfare sources: the Orthopedic Foundation for Animals (OFA), AKC Canine Health Foundation, The Kennel Club (UK), RSPCA, University of Cambridge BOAS research, and peer-reviewed studies (PLOS ONE, Canine Medicine and Genetics, VetCompass).
