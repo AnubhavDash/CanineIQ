@@ -5,7 +5,7 @@ export const DOG_VOICES = {
   english_bulldog:
     "I look cute, don't I? But even walking is a fight for breath. I can't even be born without surgery. I didn't choose this. They bred me to be a picture, not a dog. Don't you love me as I am? I love you as you are.",
   pitbull:
-    "I look tough, don't I? That's why they wanted me. But when I stop being a status symbol, what happens to me? I just want to love you and be loved. I didn't choose my reputation. Please see me as I am, because I love you as you are.",
+    "You saw my face and imagined what I could say about you. You imagined protection, attention, a reputation. I am not any of those things. I am a dog who will depend on your patience, your containment, your training, and your willingness to keep showing up when nobody is watching. When I stop making you feel powerful, will I still have a home? I do not need to look impressive. I need you to be responsible.",
   rottweiler:
     "People are scared of me before they know me. They got me to look impressive, to feel protected. But I just want a home. When the image stops mattering, will I still matter to you? Love me as I am. I love you as you are.",
   doberman:

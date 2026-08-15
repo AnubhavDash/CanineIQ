@@ -4,7 +4,7 @@ import { LIVE_MODE, GEMINI_API_KEY } from './config.js';
 import { callGemini } from './gemini.js';
 
 const BREEDS = [
-  { id: 'pitbull', label: 'Pitbull / American Staffordshire', risk: 'high', emoji: '🐕' },
+  { id: 'pitbull', label: 'Pit bull', risk: 'high', emoji: '' },
   { id: 'rottweiler', label: 'Rottweiler', risk: 'high', emoji: '🐕‍🦺' },
   { id: 'german_shepherd', label: 'German Shepherd', risk: 'medium', emoji: '🦮' },
   { id: 'husky', label: 'Husky / Malamute', risk: 'medium', emoji: '🐺' },
@@ -237,7 +237,7 @@ Only respond with valid JSON, no extra text.`;
           <span className="section-label">Step 1 of {totalSteps}</span>
         </div>
         <div className="assessment-content">
-          <h2 className="q-title">Which breed are you considering?</h2>
+          <div className="pitbull-intro"><img src="/images/pitbull.jpg" alt="Pit bull waiting for a home" /><div><span className="section-label">Start with the dog people turn into a symbol</span><p>Choose what you actually want. If it is a pit bull, do not soften the answer to make yourself look responsible.</p></div></div><h2 className="q-title">Which breed are you considering?</h2>
           <p className="q-sub">Be honest — this assessment only works if you pick the breed you actually want, not one that sounds responsible.</p>
           <div className="breed-grid">
             {BREEDS.map(b => (
@@ -247,7 +247,7 @@ Only respond with valid JSON, no extra text.`;
                 onClick={() => handleBreedSelect(b.id)}
                 style={{ '--risk-color': RISK_COLORS[b.risk] }}
               >
-                <span className="breed-emoji">{b.emoji}</span>
+                <img className="breed-thumb" src={`/images/${b.id}.jpg`} alt="" />
                 <span className="breed-name">{b.label}</span>
                 <span className="breed-risk" style={{ color: RISK_COLORS[b.risk] }}>
                   {RISK_LABELS[b.risk]}
