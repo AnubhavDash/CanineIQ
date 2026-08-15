@@ -3,7 +3,7 @@ import './Landing.css';
 
 export default function Landing({ onStartAssessment, onBreedHealth }) {
   return <main className="landing">
-    <nav className="landing-nav"><span className="logo">Canine<span>IQ</span></span><div className="nav-links"><button className="nav-link" onClick={onBreedHealth}>Breed health</button><button className="btn-primary" onClick={onStartAssessment}>Begin assessment</button></div></nav>
+    <nav className="landing-nav"><span className="logo">Canine<span>IQ</span></span><div className="nav-links"><button className="nav-link" onClick={onBreedHealth}>Read the research</button><button className="btn-primary" onClick={onStartAssessment}>Begin assessment</button></div></nav>
     <section className="hero">
       <div className="hero-copy"><p className="hero-eyebrow">A welfare intervention, not a personality quiz</p><h1>Want the dog.<br /><em>Ready for the life?</em></h1><p className="hero-sub">A dog is not a costume, a security system, or proof that you are a certain kind of person. CanineIQ asks whether you can provide the time, control, training, money, and patience your choice demands.</p><div className="hero-actions"><button className="btn-primary btn-large" onClick={onStartAssessment}>Find out before you commit <span aria-hidden="true">↗</span></button><button className="btn-ghost" onClick={onBreedHealth}>Understand the health burden</button></div></div>
       <div className="hero-dog glass"><img src="/images/pitbull.jpg" alt="Pit bull looking directly at the camera" /><div className="hero-dog-caption"><span>The breed is not the villain.</span><strong>Your choices decide whether this works.</strong></div><div className="hero-stamp">01<br /><small>THE REAL<br />QUESTION</small></div></div>
