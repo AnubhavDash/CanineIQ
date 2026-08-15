@@ -24,7 +24,7 @@ CanineIQ confronts both problems directly.
 - A breed alternative if you're not ready
 
 ### 2. The Dog Speaks
-The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs — shown alongside a quick facts strip (breed, score, verdict) so the verdict is unmissable.
+The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs — shown alongside a quick facts strip (breed, score, verdict) so the verdict is unmissable. A "Read it to me" button reads the letter aloud through your browser's built-in speech synthesis (slow, soft, low-pitch) — no AI, no API, no audio files.
 
 ### 3. Breed Health Transparency
 An honest breakdown of genetic health problems in 8 popular breeds — French Bulldogs, Pugs, English Bulldogs, Cavalier King Charles Spaniels, and more. Powered by **Google AI**:

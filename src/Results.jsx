@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Results.css';
 
 const RECOMMENDATION_CONFIG = {
@@ -56,9 +56,39 @@ function ScoreRing({ score }) {
 
 export default function Results({ data, results, onRetake, onHome }) {
   const [showAltReasons, setShowAltReasons] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
   const voiceScript = results.dogVoice || FALLBACK_VOICE;
+
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const toggleSpeak = () => {
+    if (!('speechSynthesis' in window)) return;
+    const synth = window.speechSynthesis;
+    if (synth.speaking) {
+      if (synth.paused) { synth.resume(); setSpeaking(true); }
+      else { synth.pause(); setSpeaking(false); }
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(voiceScript);
+    u.rate = 0.82;
+    u.pitch = 0.88;
+    u.volume = 1;
+    const voices = synth.getVoices();
+    const gentle = voices.find(v => /en[-_]US/i.test(v.lang) && /(samantha|aria|jenny|zira|female)/i.test(v.name))
+      || voices.find(v => /en[-_]US/i.test(v.lang))
+      || voices[0];
+    if (gentle) u.voice = gentle;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    synth.speak(u);
+    setSpeaking(true);
+  };
 
   return (
     <div className="results-wrap">
@@ -106,6 +136,13 @@ export default function Results({ data, results, onRetake, onHome }) {
           <blockquote className="dog-voice-text">
             "{voiceScript}"
           </blockquote>
+          <button className="speak-btn" onClick={toggleSpeak}>
+            {speaking ? (
+              <><span className="speak-icon">⏸</span> Pause</>
+            ) : (
+              <><span className="speak-icon">🔊</span> Read it to me</>
+            )}
+          </button>
           <div className="dv-divider" />
           <div className="dv-foot">
             <div className="dv-foot-item">
