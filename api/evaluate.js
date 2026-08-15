@@ -51,8 +51,8 @@ function normalize(result, questions, breed) {
     score: Math.max(0, Math.min(100, Math.round(score))),
     recommendation,
     readyFor: breed.label,
-    topWarnings: Array.isArray(result.topWarnings) ? result.topWarnings.slice(0, 4) : [],
-    topStrengths: Array.isArray(result.topStrengths) ? result.topStrengths.slice(0, 4) : [],
+    topWarnings: Array.isArray(result.topWarnings) ? result.topWarnings.slice(0, 3) : [],
+    topStrengths: Array.isArray(result.topStrengths) ? result.topStrengths.slice(0, 3) : [],
     altReasons: Array.isArray(result.altReasons) ? result.altReasons.slice(0, 4) : [],
     answerFindings: questions.map((question, index) => findings[index] || { question: question.question, finding: 'Gemini could not provide a finding for this answer.', concernLevel: 'WATCH' }),
   };
@@ -79,7 +79,13 @@ export default {
         return json({ error: 'Incomplete assessment' }, 400);
       }
       const transcript = questions.map((question, index) => `${index + 1}. ${question.question}\nSelected: ${question.answer || 'No preset selection'}\nAdditional context: ${question.custom?.trim() || 'None provided'}`).join('\n\n');
-      const prompt = `You are a dog-welfare evaluator. Judge the human's preparation, not the breed as a moral category. Give a distinct evaluation based on the actual answers below. Do not use a default score. A score must reflect the evidence: time, experience, training, safety, budget, motivation, and stability. Use the breed context as research guidance, not as a stereotype. Recommend an alternative only when it genuinely fits the stated life better, and explain why it fits this person's answers.\n\nBREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nReturn only JSON with exactly: score integer 0-100; verdict one plain-language sentence; readyFor; topWarnings array of 3 specific answer-based concerns; topStrengths array of 2 specific answer-based strengths; dogVoice 4-6 sentences; recommendation READY, CAUTION, or NOT_READY; alternateBreed string or empty; altReasons array of 3 reasons tied to this person’s answers; answerFindings array of exactly 8 objects with question, finding, concernLevel LOW/WATCH/ACTION. Never return generic filler, and never claim a statistic unless supported by the supplied context.`;
+      const prompt = `You are a dog-welfare evaluator. Judge the human's preparation against the real demands of the chosen breed, using their specific answers — never a default score, never generic filler.
+
+SCORING: Evaluate each of the 8 answers individually against what that answer really requires for THIS breed (living space, experience, daily time, training plan, household safety, budget, motivation, life stability). Give every one of the 8 answers equal weight — each contributes the same share toward the final 0-100 score. Aggregate the eight into one honest score. If any single answer is a serious mismatch, it must meaningfully drag the score down.
+
+CONCERNS AND STRENGTHS: Write concrete, personalised items tied to the person's actual answers and the breed's documented needs — not a restatement of their answer and not generic advice. Each concern must name the specific answer, why it is a genuine problem for THIS breed, and the concrete risk. Each strength must name the specific answer and why it is a genuine asset for THIS breed. Do not soften, pad, or invent.
+
+BREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nReturn only JSON with exactly: score integer 0-100; verdict one plain-language sentence; readyFor; topWarnings array of exactly 3 concrete answer-based concerns; topStrengths array of exactly 3 concrete answer-based strengths; dogVoice 4-6 sentences; recommendation READY, CAUTION, or NOT_READY; alternateBreed string or empty; altReasons array of 3 reasons tied to this person's answers; answerFindings array of exactly 8 objects with question, finding, concernLevel LOW/WATCH/ACTION. Never return generic filler, and never claim a statistic unless supported by the supplied context.`;
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
