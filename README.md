@@ -94,8 +94,8 @@ Set these in Vercel → Settings → Environment Variables, then redeploy. Keys 
 
 ## Prize Categories
 
-- ✅ **Best Use of Google AI** — Core AI assessment engine, breed health analysis, and photo-based breed identification
-- ✅ **Best Use of ElevenLabs** — Emotional "Read it to me" voice for the dog's letter (with graceful browser fallback)
+- **Best Use of Google AI** — Core AI assessment engine, breed health analysis, and photo-based breed identification
+- **Best Use of ElevenLabs** — Emotional "Read it to me" voice for the dog's letter (with graceful browser fallback)
 
 ---
 
