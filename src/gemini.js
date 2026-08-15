@@ -1,8 +1,8 @@
 import { GEMINI_API_KEY, GEMINI_MODEL } from './config.js';
 
-export async function callGemini(prompt, maxOutputTokens = 1000) {
+export async function callGemini(prompt, maxOutputTokens = 3000) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+    'https://generativelanguage.googleapis.com/v1beta/interactions',
     {
       method: 'POST',
       headers: {
@@ -10,11 +10,12 @@ export async function callGemini(prompt, maxOutputTokens = 1000) {
         'x-goog-api-key': GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
+        model: GEMINI_MODEL,
+        input: prompt,
+        generation_config: {
           temperature: 1,
-          maxOutputTokens,
-          responseMimeType: 'application/json',
+          max_output_tokens: maxOutputTokens,
+          thinking_level: 'minimal',
         },
       }),
     }
@@ -25,7 +26,10 @@ export async function callGemini(prompt, maxOutputTokens = 1000) {
   }
 
   const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const text = (data.steps || [])
+    .filter(s => s.type === 'model_output')
+    .map(s => (s.content || []).map(p => p.text || '').join(''))
+    .join('');
   if (!text) throw new Error('Empty Gemini response');
   return text.replace(/```json|```/g, '').trim();
 }
