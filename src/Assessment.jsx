@@ -182,7 +182,7 @@ export default function Assessment({ onComplete, onBack }) {
       url = await dogceoImage(item.slug);
       if (url) setPhotoThumbs((prev) => ({ ...prev, [item.id]: url }));
     }
-    setBreed({ ...item, source: 'search', image: url || `/images/${item.id}.jpg` });
+    setBreed({ ...item, source: 'search', image: url || (CORE_IDS.has(item.id) ? `/images/${item.id}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg') });
   };
 
   const identifyDog = async (file) => {

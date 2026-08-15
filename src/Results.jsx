@@ -160,7 +160,7 @@ export default function Results({ data, results, onRetake, onHome }) {
             <div className="verdict-label section-label" style={{ color: rec.color }}>
               {rec.label} · Gemini assessment
             </div>
-            <div className="verdict-breed"><img className="result-breed-thumb" src={breedImage} alt="" /> {data.breed?.label}</div>
+            <div className="verdict-breed"><img className="result-breed-thumb" src={breedImage} alt="" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg'; }} /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
           </div>
         </div>
