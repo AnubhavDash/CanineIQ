@@ -113,8 +113,12 @@ export default function Assessment({ onComplete, onBack }) {
   const [identifyError, setIdentifyError] = useState(null);
   const [photoThumbs, setPhotoThumbs] = useState({});
   const fileRef = useRef(null);
-  const cameraRef = useRef(null);
   const [showCamOptions, setShowCamOptions] = useState(false);
+  const [camOpen, setCamOpen] = useState(false);
+  const [camError, setCamError] = useState(null);
+  const [camReady, setCamReady] = useState(false);
+  const camVideoRef = useRef(null);
+  const camStreamRef = useRef(null);
   const total = QUESTIONS.length + 1;
   const current = QUESTIONS[step - 1];
   const answer = current ? answers[current.id] : null;
@@ -226,6 +230,50 @@ export default function Assessment({ onComplete, onBack }) {
   };
 
   const setAnswer = (value) => setAnswers((prev) => ({ ...prev, [current.id]: value }));
+
+  const openCamera = async () => {
+    setCamError(null);
+    setCamReady(false);
+    setCamOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      camStreamRef.current = stream;
+      if (camVideoRef.current) {
+        camVideoRef.current.srcObject = stream;
+        await camVideoRef.current.play();
+      }
+      setCamReady(true);
+    } catch (err) {
+      console.error('[camera]', err?.message);
+      setCamError('Camera access denied. Use "Choose from gallery" instead, or allow camera permission and try again.');
+      stopCamera();
+    }
+  };
+
+  const stopCamera = () => {
+    if (camStreamRef.current) {
+      camStreamRef.current.getTracks().forEach((t) => t.stop());
+      camStreamRef.current = null;
+    }
+    setCamOpen(false);
+    setCamReady(false);
+  };
+
+  const capturePhoto = () => {
+    const video = camVideoRef.current;
+    if (!video || !camReady) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], 'camera.jpg', { type: 'image/jpeg' });
+      stopCamera();
+      identifyDog(file);
+    }, 'image/jpeg', 0.92);
+  };
+
   const submit = async () => {
     setLoading(true); setError(null);
     const payload = { breed, questions: QUESTIONS.map((q) => ({ ...q, answer: answers[q.id] || null, custom: custom[q.id] || '' })) };
@@ -288,12 +336,11 @@ export default function Assessment({ onComplete, onBack }) {
             </button>
             {showCamOptions && (
               <div className="identify-options">
-                <button className="identify-option" onClick={() => { cameraRef.current?.click(); setShowCamOptions(false); }}>📷 Take a photo</button>
+                <button className="identify-option" onClick={() => { openCamera(); setShowCamOptions(false); }}>📷 Take a photo</button>
                 <button className="identify-option" onClick={() => { fileRef.current?.click(); setShowCamOptions(false); }}>🖼️ Choose from gallery</button>
               </div>
             )}
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
-            <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
             {identifyError && <p className="identify-error">{identifyError}</p>}
           </div>
         </div>
@@ -306,6 +353,26 @@ export default function Assessment({ onComplete, onBack }) {
       <label className="custom-label" htmlFor={`custom-${current.id}`}>Your answer, in your own words <span>optional but useful</span></label><textarea id={`custom-${current.id}`} className="custom-answer" value={custom[current.id] || ''} onChange={(event) => setCustom((prev) => ({ ...prev, [current.id]: event.target.value }))} placeholder="Add the detail the choices missed…" rows="3" />
       {error && <p className="error-msg">{error}</p>}
     </section>}
-    <footer className={`assessment-footer${searchOpen && matches.length > 0 || showCamOptions ? ' hidden' : ''}`}>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="secondary-action" onClick={startOver}>Start over</button><button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
+    <footer className={`assessment-footer${searchOpen && matches.length > 0 || showCamOptions || camOpen ? ' hidden' : ''}`}>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="secondary-action" onClick={startOver}>Start over</button><button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
+    {camOpen && (
+      <div className="camera-overlay" onClick={stopCamera}>
+        <div className="camera-card" onClick={(e) => e.stopPropagation()}>
+          <p className="camera-kicker">TAKE A PHOTO</p>
+          <p className="camera-title">Line up the dog, then capture</p>
+          <div className="camera-frame">
+            {!camReady && !camError && <div className="camera-loading"><div className="loading-orbit"><span /></div></div>}
+            <video ref={camVideoRef} className={camReady ? 'camera-video' : 'camera-video camera-video-hidden'} autoPlay playsInline muted />
+          </div>
+          {camError ? (
+            <p className="camera-error">{camError}</p>
+          ) : (
+            <div className="camera-actions">
+              <button className="secondary-action" onClick={stopCamera}>Cancel</button>
+              <button className="primary-action" disabled={!camReady} onClick={capturePhoto}>Capture photo</button>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
   </main>;
 }
