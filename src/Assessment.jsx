@@ -72,11 +72,39 @@ const QUESTIONS = [
 
 const RISK_LABELS = { high: 'High responsibility', health: 'Serious health burden', medium: 'High activity needs', low: 'Lower barrier to entry' };
 
+const DRAFT_KEY = 'canineiq_assessment';
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (typeof saved?.step !== 'number') return null;
+    return {
+      step: Math.min(Math.max(0, Math.round(saved.step)), QUESTIONS.length),
+      breed: saved.breed || null,
+      answers: saved.answers || {},
+      custom: saved.custom || {},
+    };
+  } catch { return null; }
+}
+
 export default function Assessment({ onComplete, onBack }) {
-  const [step, setStep] = useState(0);
-  const [breed, setBreed] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [custom, setCustom] = useState({});
+  const [draft] = useState(loadDraft);
+  const [step, setStep] = useState(draft?.step ?? 0);
+  const [breed, setBreed] = useState(draft && draft.step !== 0 ? draft.breed : null);
+  const [answers, setAnswers] = useState(() => {
+    const a = { ...(draft?.answers || {}) };
+    const current = draft && draft.step !== 0 ? QUESTIONS[draft.step - 1] : null;
+    if (current) delete a[current.id];
+    return a;
+  });
+  const [custom, setCustom] = useState(() => {
+    const c = { ...(draft?.custom || {}) };
+    const current = draft && draft.step !== 0 ? QUESTIONS[draft.step - 1] : null;
+    if (current) delete c[current.id];
+    return c;
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
@@ -88,6 +116,23 @@ export default function Assessment({ onComplete, onBack }) {
   const total = QUESTIONS.length + 1;
   const current = QUESTIONS[step - 1];
   const answer = current ? answers[current.id] : null;
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, breed, answers, custom }));
+    } catch { /* storage unavailable */ }
+  }, [step, breed, answers, custom]);
+
+  const startOver = () => {
+    try { localStorage.removeItem(DRAFT_KEY); } catch { /* noop */ }
+    setStep(0);
+    setBreed(null);
+    setAnswers({});
+    setCustom({});
+    setQuery('');
+    setSearchOpen(false);
+    setIdentifyError(null);
+  };
 
   const ALL_BREEDS = useMemo(() => {
     const seen = new Set(BREEDS.map((b) => b.id));
@@ -190,6 +235,7 @@ export default function Assessment({ onComplete, onBack }) {
         throw new Error(detail);
       }
       onComplete({ breed, answers, custom }, await response.json());
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* noop */ }
     } catch (err) {
       console.error('[v0] Evaluation failed:', err.message);
       const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
@@ -251,6 +297,6 @@ export default function Assessment({ onComplete, onBack }) {
       <label className="custom-label" htmlFor={`custom-${current.id}`}>Your answer, in your own words <span>optional but useful</span></label><textarea id={`custom-${current.id}`} className="custom-answer" value={custom[current.id] || ''} onChange={(event) => setCustom((prev) => ({ ...prev, [current.id]: event.target.value }))} placeholder="Add the detail the choices missed…" rows="3" />
       {error && <p className="error-msg">{error}</p>}
     </section>}
-    <footer className={`assessment-footer${searchOpen && matches.length > 0 ? ' hidden' : ''}`}>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
+    <footer className={`assessment-footer${searchOpen && matches.length > 0 ? ' hidden' : ''}`}>{step > 0 && <button className="secondary-action" onClick={() => setStep((value) => value - 1)}>Back</button>}<button className="secondary-action" onClick={startOver}>Start over</button><button className="primary-action" disabled={step === 0 ? !breed : !answer && !(custom[current?.id] || '').trim()} onClick={step === 0 ? () => setStep(1) : next}>{step === 0 ? 'Begin the questions' : step === QUESTIONS.length ? 'Show me the truth' : 'Continue'}</button></footer>
   </main>;
 }
