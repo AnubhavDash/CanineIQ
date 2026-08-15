@@ -71,7 +71,7 @@ export default {
       return json({ error: 'Method not allowed' }, 405);
     }
     if (!API_KEY) {
-      return json({ error: 'GEMINI_API_KEY is not set on the server. Add it in Vercel → Settings → Environment Variables, then redeploy.' }, 500);
+      return json({ error: 'GEMINI_API_KEY is not set on the server. Add it in Vercel Settings - Environment Variables, then redeploy.' }, 500);
     }
     try {
       const { breed, questions } = await request.json();

@@ -44,11 +44,18 @@ export default function Assessment({ onComplete, onBack }) {
     const payload = { breed, questions: QUESTIONS.map((q) => ({ ...q, answer: answers[q.id] || null, custom: custom[q.id] || '' })) };
     try {
       const response = await fetch('/api/evaluate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!response.ok) throw new Error('Evaluation unavailable');
+      if (!response.ok) {
+        let detail = 'Gemini evaluation is unavailable. Please try again. Your answers are still here.';
+        try { const j = await response.json(); if (j?.error) detail = j.error; } catch { /* non-JSON error */ }
+        throw new Error(detail);
+      }
       onComplete({ breed, answers, custom }, await response.json());
     } catch (err) {
       console.error('[v0] Evaluation failed:', err.message);
-      setError('Gemini evaluation is not available in this local Vite preview yet. Deploy the project with the server function enabled, then try again. Your answers are still here.');
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      setError(isLocal
+        ? 'Gemini evaluation is not available in this local Vite preview yet. Deploy the project with the server function enabled, then try again. Your answers are still here.'
+        : err.message || 'Gemini evaluation is unavailable. Please try again. Your answers are still here.');
       setLoading(false);
     }
   };
