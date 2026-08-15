@@ -58,7 +58,7 @@ export default function Results({ data, results, onRetake, onHome }) {
   const audioRef = useRef(null);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
-  const voiceScript = DOG_VOICES[breedId] || results.dogVoice || DOG_VOICE_FALLBACK;
+  const voiceScript = results.dogVoice || DOG_VOICES[breedId] || DOG_VOICE_FALLBACK;
   const audioSrc = breedId ? `/audio/${breedId}.mp3` : null;
 
   const togglePlay = () => {
@@ -82,7 +82,7 @@ export default function Results({ data, results, onRetake, onHome }) {
           <ScoreRing score={results.score} />
           <div className="verdict-text">
             <div className="verdict-label section-label" style={{ color: rec.color }}>
-              {rec.label}
+              {rec.label} · Gemini assessment
             </div>
             <div className="verdict-breed"><img className="result-breed-thumb" src={`/images/${breedId}.jpg`} alt="" /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
@@ -165,7 +165,7 @@ export default function Results({ data, results, onRetake, onHome }) {
           <div className="section-label">A better match for your life right now</div>
           <div className="alt-breed-name">{results.alternateBreed}</div>
           <p className="alt-breed-sub">
-            Start here. Build experience. Come back when you're ready for your first choice.
+            This is not a consolation prize. It is Gemini’s best-fit recommendation for the life you described—not a generic “easy dog.”
           </p>
           <button
             className="btn-ghost alt-why-btn"

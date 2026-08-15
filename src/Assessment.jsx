@@ -26,7 +26,6 @@ const QUESTIONS = [
 ];
 
 const RISK_LABELS = { high: 'High responsibility', health: 'Serious health burden', medium: 'High activity needs', low: 'Lower barrier to entry' };
-const DEMO_RESULT = (breed) => ({ score: 48, verdict: 'You may want this dog. That is not the same as being ready to carry its needs every day.', readyFor: breed.label, topWarnings: ['Your current answers leave important safety and care gaps to solve before bringing this dog home.', 'Training, containment, veterinary care, and daily enrichment are responsibilities, not optional upgrades.', 'If the novelty disappears, this dog will still need the same patience, structure, and protection.'], topStrengths: ['You were willing to answer questions that could make you uncomfortable.', 'You now have a clearer list of what must change before you commit.'], dogVoice: 'You may love the idea of me. I need you to love the ordinary work too: the gates, the walks, the training, the vet bills, and the patience when I get it wrong. I am not here to make you look a certain way. I am here for the rest of my life. Please decide based on what you can consistently give me, not what I can make people think about you.', recommendation: 'CAUTION', alternateBreed: 'Labrador Retriever', altReasons: ['A calmer starting point while you build practical experience.', 'A better fit for a home that needs predictable companionship.', 'The right match is the one whose daily needs you can meet without resentment.'], answerFindings: [] });
 
 export default function Assessment({ onComplete, onBack }) {
   const [step, setStep] = useState(0);
@@ -48,9 +47,9 @@ export default function Assessment({ onComplete, onBack }) {
       if (!response.ok) throw new Error('Evaluation unavailable');
       onComplete({ breed, answers, custom }, await response.json());
     } catch (err) {
-      console.warn('[v0] Evaluation fallback:', err.message);
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      onComplete({ breed, answers, custom }, DEMO_RESULT(breed));
+      console.error('[v0] Evaluation failed:', err.message);
+      setError('Gemini evaluation is not available in this local Vite preview yet. Deploy the project with the server function enabled, then try again. Your answers are still here.');
+      setLoading(false);
     }
   };
   const next = () => step < total - 1 ? setStep((value) => value + 1) : submit();

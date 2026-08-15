@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import './BreedHealth.css';
-import { LIVE_MODE, GEMINI_API_KEY } from './config.js';
-import { callGemini } from './gemini.js';
 
 const HEALTH_BREEDS = [
   {
     id: 'french_bulldog',
     name: 'French Bulldog',
-    emoji: '🐾',
-    condition: 'BOAS',
-    conditionFull: 'Brachycephalic Obstructive Airway Syndrome',
+    condition: 'Airway + heat intolerance',
+    conditionFull: 'Brachycephalic Obstructive Airway Syndrome (BOAS)',
     severity: 'critical',
     popularityRank: 1,
-    tag: 'Bred for flat face — causes lifetime breathing issues',
+    tag: 'Shortened skulls can make ordinary breathing and cooling harder',
+    profile: { overview: 'The French Bulldog’s compact skull and narrowed upper airway were selected for a particular appearance. The result is not just snoring: some dogs must work harder to breathe, cool themselves, sleep, and exercise.', whatItFeelsLike: 'A short walk, warm room, or excited greeting can become a breathing problem. Watch for noisy breathing, open-mouth breathing, blue-tinged gums, collapse, or a long recovery after activity.', surgeryRate: 'Varies by airway severity', lifeExpectancy: 'About 9–12 years', whatBreedersWontTellYou: 'A quiet puppy is not proof of a healthy airway. Symptoms can worsen with age, weight gain, heat, and stress.', isItEthicalToBuy: 'Only with health-first breeding, independent veterinary screening, and a realistic budget for airway and spinal care.', healthierAlternative: 'Boston Terrier from health-tested lines, or a mixed-breed companion with an open airway' },
   },
   {
     id: 'pug',
@@ -92,16 +90,17 @@ const SEV_CONFIG = {
   medium: { color: '#E8A847', label: 'Moderate', bg: 'rgba(232,168,71,0.1)' },
 };
 
-const DEMO_DETAIL = (breed) => ({
-  breed,
-  overview: `Human breeders spent generations selecting for a look that comes with ${breed.conditionFull.toLowerCase()} built in. The trait is prized by buyers and paid for by ${breed.name}s every single day of their lives.`,
-  whatItFeelsLike: `Every breath is work. Every morning starts exhausted. It is a constant, quiet discomfort the dog cannot explain and cannot escape.`,
-  surgeryRate: '~40%',
-  lifeExpectancy: '8–10 yrs',
-  whatBreedersWontTellYou: `They will show you the puppy's parents and hide the operating table those parents will need.`,
-  isItEthicalToBuy: 'No — adopting or choosing a healthier breed is the honest option.',
-  healthierAlternative: 'A mixed-breed rescue with a compatible temperament.',
-});
+const CURATED_DETAILS = {
+  pug: { overview: 'The Pug’s shortened face, crowded teeth, prominent eyes, and compact spine are linked to a look people find appealing. Those traits can affect breathing, temperature control, eye protection, skin, and movement.', whatItFeelsLike: 'Heat and exertion can quickly become distressing. Eye injuries, skin-fold infections, and airway obstruction are not cosmetic inconveniences; they can require lifelong management.', surgeryRate: 'Varies by airway severity', lifeExpectancy: 'About 10–12 years', whatBreedersWontTellYou: 'A dramatic snort is not a personality trait. It can be a sign that the dog is struggling to move air.', isItEthicalToBuy: 'Only when the breeder selects for function, documents health testing, and never treats severe breathing as normal.', healthierAlternative: 'A healthier small companion with an open muzzle and moderate build' },
+  english_bulldog: { overview: 'The modern English Bulldog combines a compressed airway, heavy body, narrow pelvis, and joint strain. The silhouette is recognisable because generations of selection made extreme proportions the selling point.', whatItFeelsLike: 'Standing, walking, breathing, mating, and giving birth can all require human intervention. Heat, obesity, and stairs can turn everyday life into a medical problem.', surgeryRate: 'Airway and reproductive intervention are common concerns', lifeExpectancy: 'Often about 8–10 years', whatBreedersWontTellYou: 'The puppy price is only the entry cost. Insurance exclusions, emergency care, and weight management can define the dog’s life.', isItEthicalToBuy: 'Only if health and natural function come before the show-ring look, with a plan for expensive care.', healthierAlternative: 'A moderate-built bulldog-type rescue or a healthier companion breed' },
+  dachshund: { overview: 'The Dachshund’s long back and short legs were selected for underground hunting. That working shape is useful, but it also creates a mechanical vulnerability that owners must manage every day.', whatItFeelsLike: 'A disc injury can mean sudden pain, weakness, loss of bladder control, or paralysis. Jumping off furniture and carrying excess weight can increase the strain on the spine.', surgeryRate: 'IVDD treatment ranges from rest to urgent surgery', lifeExpectancy: 'About 12–16 years', whatBreedersWontTellYou: 'A lively dog can still have a fragile back. Prevention is not optional once you bring the body shape home.', isItEthicalToBuy: 'Yes, when the owner accepts strict weight, stair, jumping, and veterinary-management responsibilities.', healthierAlternative: 'A moderate-bodied small hound or mixed breed with similar curiosity' },
+  german_shepherd: { overview: 'German Shepherds are intelligent working dogs, but breeding priorities can exaggerate rear angulation, size, and joint loading. Good lines still need documented hip, elbow, temperament, and working-function screening.', whatItFeelsLike: 'Joint disease can make a young, eager dog reluctant to rise, climb, run, or work. Anxiety and poor nerve stability can be as damaging to a household as orthopedic pain.', surgeryRate: 'Joint care may involve lifelong medication or surgery', lifeExpectancy: 'About 9–13 years', whatBreedersWontTellYou: 'A pedigree is not a health guarantee. Ask for verifiable testing and watch the adults move, recover, and behave.', isItEthicalToBuy: 'Yes, when chosen for stable temperament and sound movement rather than exaggerated appearance.', healthierAlternative: 'A working-line dog or mixed breed selected for stable nerves and moderate structure' },
+  cavalier: { overview: 'Cavalier King Charles Spaniels can inherit early mitral valve disease and a skull shape associated with Chiari-like malformation and syringomyelia. Their affectionate temperament should not obscure the medical burden some lines carry.', whatItFeelsLike: 'Heart disease can reduce stamina and cause coughing or collapse. Neurological pain may show as scratching, sensitivity around the neck, or reluctance to move.', surgeryRate: 'Cardiac monitoring and medication are common in affected dogs', lifeExpectancy: 'About 9–14 years, highly variable', whatBreedersWontTellYou: 'A sweet personality does not make inherited disease less painful. Breeding decisions determine how much of that burden is passed on.', isItEthicalToBuy: 'Only from breeders following current heart and neurological screening guidance, with funds for lifelong cardiology care.', healthierAlternative: 'A health-tested small companion with a less extreme skull and heart profile' },
+  great_dane: { overview: 'Great Danes pay for extreme size with accelerated growth, joint stress, and a serious risk of gastric dilatation-volvulus. Their scale changes the cost, space, food, and emergency planning required from the owner.', whatItFeelsLike: 'A twisted stomach is a life-threatening emergency measured in hours. Growing bones and a large frame also make flooring, exercise, nutrition, and pain management consequential.', surgeryRate: 'Emergency bloat surgery can be lifesaving', lifeExpectancy: 'Often about 7–10 years', whatBreedersWontTellYou: 'The giant puppy becomes a giant medical and logistical commitment very quickly. A home that fits a puppy may not fit an adult.', isItEthicalToBuy: 'Yes, if the household can provide space, preventive care, emergency funds, and a breeder who prioritises longevity.', healthierAlternative: 'A large but more moderate mixed breed with a longer expected lifespan' },
+  boxer: { overview: 'Boxers are athletic, expressive dogs, but the breed has elevated concern around heart disease, certain cancers, and heat tolerance. Health screening and family longevity matter more than a fashionable head or pedigree.', whatItFeelsLike: 'Arrhythmias may be silent until a dog faints or collapses. Cancer can arrive early, making routine checks, insurance, and emotionally difficult decisions part of ownership.', surgeryRate: 'Cardiac screening and oncology care may be needed', lifeExpectancy: 'About 9–12 years', whatBreedersWontTellYou: 'A playful puppy can carry risks that only show later. Ask for real family health history, not just a registration certificate.', isItEthicalToBuy: 'Yes, when selecting for soundness and longevity and preparing for serious veterinary costs.', healthierAlternative: 'A health-tested moderate athletic mixed breed with documented family longevity' },
+};
+
+const DEMO_DETAIL = (breed) => ({ breed, ...(breed.profile || CURATED_DETAILS[breed.id] || { overview: `Research the inherited conditions associated with ${breed.name} before choosing one.`, whatItFeelsLike: 'The impact varies by individual dog and should be assessed with a veterinarian.', surgeryRate: 'Depends on individual health', lifeExpectancy: 'Varies by line and care', whatBreedersWontTellYou: 'Ask for documented health testing and adult-dog outcomes.', isItEthicalToBuy: 'Only when health, function, and lifelong care are prioritised.', healthierAlternative: 'A healthier mixed-breed companion selected for compatible temperament' }) });
 
 export default function BreedHealth({ onBack }) {
   const [selected, setSelected] = useState(null);
@@ -115,32 +114,9 @@ export default function BreedHealth({ onBack }) {
     setError(null);
     setLoading(true);
 
-    const prompt = `You are a veterinary geneticist and animal welfare expert. Give an honest, no-holds-barred explanation of the health problems in ${breed.name}s caused by selective breeding.
-
-Primary condition: ${breed.conditionFull}
-
-Respond in this exact JSON format:
-{
-  "overview": "<2-3 sentence plain-language overview of what was done to this breed genetically and why it's cruel>",
-  "whatItFeelsLike": "<1-2 sentences describing what the dog actually experiences day to day — make it visceral and real>",
-  "surgeryRate": "<realistic percentage or stat about how many need surgery or vet intervention>",
-  "lifeExpectancy": "<honest lifespan compared to healthier breeds>",
-  "whatBreedersWontTellYou": "<the uncomfortable truth breeders hide from buyers — 1-2 sentences>",
-  "isItEthicalToBuy": "<honest 1-sentence answer: yes, no, or conditional — no diplomatic hedging>",
-  "healthierAlternative": "<a breed with similar temperament but far fewer genetic health problems>"
-}
-
-Only respond with valid JSON.`;
-
     try {
-      let parsed;
-      if (LIVE_MODE && GEMINI_API_KEY) {
-        const text = await callGemini(prompt);
-        parsed = JSON.parse(text);
-      } else {
-        await new Promise(r => setTimeout(r, 1100));
-        parsed = DEMO_DETAIL(breed);
-      }
+      await new Promise(r => setTimeout(r, 450));
+      const parsed = DEMO_DETAIL(breed);
       setDetail({ breed, ...parsed });
     } catch (e) {
       setError('Failed to load breed health data. Please try again.');
@@ -161,8 +137,7 @@ Only respond with valid JSON.`;
         <div className="section-label">Breed Health Transparency</div>
         <h1 className="bh-title">What breeders don't tell you</h1>
         <p className="bh-sub">
-          Many of the most popular dogs alive today carry genetic conditions deliberately bred into them
-          for human aesthetics — flat faces, elongated spines, oversized heads. This is what that looks like.
+          Breed health is not a morality score. It is a record of what humans selected for, what the dog may live with, and what an owner must be prepared to manage. Select a breed for its own documented profile—not a generic warning.
         </p>
       </div>
 
