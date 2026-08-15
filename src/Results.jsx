@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './Results.css';
-import { DOG_VOICES, DOG_VOICE_FALLBACK } from './dogVoices.js';
 
 const RECOMMENDATION_CONFIG = {
   READY: {
@@ -25,6 +24,9 @@ const RECOMMENDATION_CONFIG = {
     icon: '✕',
   },
 };
+
+const FALLBACK_VOICE =
+  "I look cute, don't I? But look closer — every breath is a small fight for me. I didn't choose this face, and I can't tell you how tired I get just trying to sleep at night. Promise me you'll learn what I actually need.";
 
 function ScoreRing({ score }) {
   const r = 56;
@@ -53,20 +55,10 @@ function ScoreRing({ score }) {
 }
 
 export default function Results({ data, results, onRetake, onHome }) {
-  const [playing, setPlaying] = useState(false);
   const [showAltReasons, setShowAltReasons] = useState(false);
-  const audioRef = useRef(null);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
-  const voiceScript = results.dogVoice || DOG_VOICES[breedId] || DOG_VOICE_FALLBACK;
-  const audioSrc = breedId ? `/audio/${breedId}.mp3` : null;
-
-  const togglePlay = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    if (a.paused) { a.play(); setPlaying(true); }
-    else { a.pause(); setPlaying(false); }
-  };
+  const voiceScript = results.dogVoice || FALLBACK_VOICE;
 
   return (
     <div className="results-wrap">
@@ -109,31 +101,26 @@ export default function Results({ data, results, onRetake, onHome }) {
 
         <div className="dog-voice-panel">
           <div className="dv-eyebrow section-label">
-            What this dog needs from you
+            A letter from your {data?.breed?.label || 'future dog'}
           </div>
           <blockquote className="dog-voice-text">
             "{voiceScript}"
           </blockquote>
-
-          {audioSrc && (
-            <button
-              className={`play-btn ${playing ? 'playing' : ''}`}
-              onClick={togglePlay}
-            >
-              {playing ? (
-                <><span className="play-icon">⏸</span> Pause</>
-              ) : (
-                <><span className="play-icon">▶</span> Hear it in their voice</>
-              )}
-            </button>
-          )}
-
-          <audio
-            ref={audioRef}
-            src={audioSrc}
-            preload="none"
-            onEnded={() => setPlaying(false)}
-          />
+          <div className="dv-divider" />
+          <div className="dv-foot">
+            <div className="dv-foot-item">
+              <span className="dv-foot-label">The breed</span>
+              <span className="dv-foot-value">{data?.breed?.label || '—'}</span>
+            </div>
+            <div className="dv-foot-item">
+              <span className="dv-foot-label">Score</span>
+              <span className="dv-foot-value">{results.score}<span className="dv-foot-max">/100</span></span>
+            </div>
+            <div className="dv-foot-item">
+              <span className="dv-foot-label">Verdict</span>
+              <span className="dv-foot-value" style={{ color: rec.color }}>{rec.label}</span>
+            </div>
+          </div>
         </div>
       </div>
 

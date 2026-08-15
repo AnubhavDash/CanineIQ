@@ -24,7 +24,7 @@ CanineIQ confronts both problems directly.
 - A breed alternative if you're not ready
 
 ### 2. The Dog Speaks
-The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs. The message is also **read aloud in a soft, slow, sad voice** — pre-rendered for every breed, so hearing it costs nothing and needs no API.
+The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs — shown alongside a quick facts strip (breed, score, verdict) so the verdict is unmissable.
 
 ### 3. Breed Health Transparency
 An honest breakdown of genetic health problems in 8 popular breeds — French Bulldogs, Pugs, English Bulldogs, Cavalier King Charles Spaniels, and more. Powered by **Google AI**:
@@ -42,7 +42,6 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 | Layer | Technology |
 |-------|-----------|
 | AI Assessment | Google AI (Gemini, gemini-3.6-flash) via Vercel serverless function |
-| Voice | Pre-rendered neural voice (Microsoft edge-tts) |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
 
@@ -69,7 +68,7 @@ The assessment runs server-side in the Vercel function `api/evaluate.js`, which 
 GEMINI_API_KEY=            # Google AI (Gemini) API key — read server-side only, never shipped to the browser
 ```
 
-No client-side key is needed (nothing is exposed to the browser). The dog voice is pre-rendered static audio (`public/audio/`) and needs no API. Keys are gitignored and never committed.
+No client-side key is needed (nothing is exposed to the browser). Keys are gitignored and never committed.
 
 > Local `npm run dev` serves the UI only — the `/api/evaluate` function runs on Vercel (or `vercel dev`), so test the assessment on your deployed URL.
 
