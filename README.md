@@ -24,7 +24,7 @@ CanineIQ confronts both problems directly.
 - A breed alternative if you're not ready
 
 ### 2. The Dog Speaks
-The signature feature: your result includes a 3–4 sentence message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs. The message is read aloud via **Google Cloud Text-to-Speech** in a soft, resonant voice.
+The signature feature: your result includes a message written from the dog's perspective. If you chose the breed for status, it calls that out. If you're not ready, it tells you what it actually needs. The message is also **read aloud in a soft, slow, sad voice** — pre-rendered for every breed, so hearing it costs nothing and needs no API.
 
 ### 3. Breed Health Transparency
 An honest breakdown of genetic health problems in 8 popular breeds — French Bulldogs, Pugs, English Bulldogs, Cavalier King Charles Spaniels, and more. Powered by **Google AI**:
@@ -42,7 +42,7 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 | Layer | Technology |
 |-------|-----------|
 | AI Assessment & Breed Health | Google AI (Gemini) |
-| Voice Synthesis | Google Cloud Text-to-Speech |
+| Voice | Pre-rendered neural voice (Microsoft edge-tts) |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
 
@@ -65,11 +65,10 @@ npm run dev
 
 ```
 VITE_GEMINI_API_KEY=       # Google AI (Gemini) — assessment & breed health
-# VITE_GOOGLE_TTS_API_KEY= # Google Cloud TTS — dog voice (defaults to Gemini key)
 VITE_LIVE_MODE=false       # false = demo data (no API calls), true = live APIs
 ```
 
-Set `VITE_LIVE_MODE=true` in `.env` once you want to hit the live Gemini API. The dog voice works whenever a Google TTS key is present (it defaults to the Gemini key). Keys are gitignored and never committed.
+Set `VITE_LIVE_MODE=true` in `.env` once you want to hit the live Gemini API. The dog voice is pre-rendered static audio (`public/audio/`) and needs no API. Keys are gitignored and never committed.
 
 ---
 
