@@ -41,7 +41,7 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 
 | Layer | Technology |
 |-------|-----------|
-| AI Assessment & Breed Health | Google AI (Gemini) |
+| AI Assessment & Breed Health | Google AI (Gemini) via Vercel AI Gateway serverless function |
 | Voice | Pre-rendered neural voice (Microsoft edge-tts) |
 | Frontend | React 18, CSS custom properties |
 | Typography | Fraunces (display) + Inter (body) |
@@ -63,12 +63,15 @@ npm run dev
 
 ### Environment Variables
 
+The assessment runs through the **Vercel AI Gateway** in a serverless function (`api/evaluate.js`), so the only key needed is the AI Gateway key — set it in your Vercel project:
+
 ```
-VITE_GEMINI_API_KEY=       # Google AI (Gemini) — assessment & breed health
-VITE_LIVE_MODE=false       # false = demo data (no API calls), true = live APIs
+AI_GATEWAY_API_KEY=        # Vercel AI Gateway key (Settings → AI Gateway) that routes to google/gemini-2.5-flash
 ```
 
-Set `VITE_LIVE_MODE=true` in `.env` once you want to hit the live Gemini API. The dog voice is pre-rendered static audio (`public/audio/`) and needs no API. Keys are gitignored and never committed.
+No client-side key is needed (nothing is exposed to the browser). The dog voice is pre-rendered static audio (`public/audio/`) and needs no API. Keys are gitignored and never committed.
+
+> Local `npm run dev` serves the UI only — the `/api/evaluate` function runs on Vercel (or `vercel dev`).
 
 ---
 
