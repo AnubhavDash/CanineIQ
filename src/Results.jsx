@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Results.css';
 
 const RECOMMENDATION_CONFIG = {
@@ -57,6 +57,8 @@ function ScoreRing({ score }) {
 export default function Results({ data, results, onRetake, onHome }) {
   const [showAltReasons, setShowAltReasons] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [audioState, setAudioState] = useState('idle');
+  const audioRef = useRef(null);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
   const breedImage = data?.breed?.image || (breedId ? `/images/${breedId}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg');
@@ -64,18 +66,20 @@ export default function Results({ data, results, onRetake, onHome }) {
 
   useEffect(() => {
     return () => {
+      if (audioRef.current) audioRef.current.pause();
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
   }, []);
 
-  const toggleSpeak = () => {
+  const stopAll = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+  const speakWithBrowser = () => {
     if (!('speechSynthesis' in window)) return;
     const synth = window.speechSynthesis;
-    if (synth.speaking) {
-      if (synth.paused) { synth.resume(); setSpeaking(true); }
-      else { synth.pause(); setSpeaking(false); }
-      return;
-    }
     const u = new SpeechSynthesisUtterance(voiceScript);
     u.rate = 0.82;
     u.pitch = 0.88;
@@ -89,6 +93,55 @@ export default function Results({ data, results, onRetake, onHome }) {
     u.onerror = () => setSpeaking(false);
     synth.speak(u);
     setSpeaking(true);
+  };
+
+  const playWithEleven = async () => {
+    setAudioState('loading');
+    try {
+      const response = await fetch('/api/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: voiceScript }),
+      });
+      if (!response.ok) throw new Error(`speech ${response.status}`);
+      const blob = await response.blob();
+      if (!blob.size) throw new Error('empty audio');
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setSpeaking(false); setAudioState('idle'); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setSpeaking(false); setAudioState('idle'); URL.revokeObjectURL(url); speakWithBrowser(); };
+      await audio.play();
+      setSpeaking(true);
+      setAudioState('playing');
+    } catch {
+      setAudioState('idle');
+      speakWithBrowser();
+    }
+  };
+
+  const toggleSpeak = () => {
+    if (audioState === 'loading') return;
+    const audio = audioRef.current;
+    if (audio && !audio.paused) {
+      audio.pause();
+      setSpeaking(false);
+      setAudioState('paused');
+      return;
+    }
+    if (audio && audioState === 'paused') {
+      audio.play();
+      setSpeaking(true);
+      setAudioState('playing');
+      return;
+    }
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      const synth = window.speechSynthesis;
+      if (synth.paused) { synth.resume(); setSpeaking(true); }
+      else { synth.pause(); setSpeaking(false); }
+      return;
+    }
+    playWithEleven();
   };
 
   return (
@@ -137,8 +190,10 @@ export default function Results({ data, results, onRetake, onHome }) {
           <blockquote className="dog-voice-text">
             "{voiceScript}"
           </blockquote>
-          <button className="speak-btn" onClick={toggleSpeak}>
-            {speaking ? (
+          <button className="speak-btn" onClick={toggleSpeak} disabled={audioState === 'loading'}>
+            {audioState === 'loading' ? (
+              <><span className="speak-icon">⏳</span> Preparing the voice…</>
+            ) : speaking ? (
               <><span className="speak-icon">⏸</span> Pause</>
             ) : (
               <><span className="speak-icon">🔊</span> Read it to me</>
