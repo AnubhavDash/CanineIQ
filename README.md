@@ -103,7 +103,7 @@ Set these in Vercel → Settings → Environment Variables, then redeploy. Keys 
 
 ## Sources
 
-Breed health information draws on public veterinary and welfare sources, including the [Orthopedic Foundation for Animals (OFA)](https://www.ofa.org/), [AKC Canine Health Foundation](https://www.akcchf.org/), [The Kennel Club (UK) health schemes](https://www.thekennelclub.org.uk/health/), [RSPCA brachycephalic guidance](https://www.rspca.org.uk/adviceandwelfare/pets/dogs/health/brachycephalic), and [University of Cambridge brachycephalic research](https://www.vet.cam.ac.uk/). Figures shown are qualitative ranges ("varies by severity") rather than precise statistics, because inherited-disease risk is line-specific — always confirm with a veterinarian and the breeder's health-testing documentation. Dog photos: [Dog CEO API](https://dog.ceo/).
+Breed health information draws on public veterinary and welfare sources, including the [Orthopedic Foundation for Animals (OFA)](https://www.ofa.org/), [AKC Canine Health Foundation](https://www.akcchf.org/), [The Kennel Club (UK) health schemes](https://www.thekennelclub.org.uk/health/), [RSPCA brachycephalic guidance](https://www.rspca.org.uk/adviceandwelfare/pets/dogs/health/brachycephalic), [University of Cambridge brachycephalic research](https://www.vet.cam.ac.uk/), and [Cornell University's BOAS overview](https://www.vet.cornell.edu/departments-centers-and-institutes/riney-canine-health-center/canine-health-topics/brachycephalic-obstructive-airway-syndrome-boas). Figures shown are qualitative ranges ("varies by severity") rather than precise statistics, because inherited-disease risk is line-specific — always confirm with a veterinarian and the breeder's health-testing documentation. Dog photos: [Dog CEO API](https://dog.ceo/).
 
 ---
 
@@ -111,7 +111,7 @@ Breed health information draws on public veterinary and welfare sources, includi
 
 This came from a [Times of India](https://timesofindia.indiatimes.com/city/chandigarh/gate-opens-pitbull-attacks-how-patiala-couples-search-for-a-rental-home-turned-horrific/articleshow/133198154.cms) report about a Patiala couple who went to view a rental home and were mauled by a pitbull the moment they opened the gate — a dog that kept attacking even after its owner ordered it to stop, a dog left to roam free. The dog wasn't evil. The ownership was irresponsible.
 
-The same energy drives the brachycephalic problem: French Bulldogs are the world's most popular breed, and a huge proportion of them will need palate surgery by age 3 because humans bred them to have faces that can't function.
+The same energy drives the [brachycephalic problem](https://www.vet.cornell.edu/departments-centers-and-institutes/riney-canine-health-center/canine-health-topics/brachycephalic-obstructive-airway-syndrome-boas): French Bulldogs are the world's most popular breed, and a huge proportion of them will need palate surgery by age 3 because humans bred them to have faces that can't function.
 
 CanineIQ is blunt about both of these things because the dogs deserve honesty even when the humans buying them don't want to hear it.
 
