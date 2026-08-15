@@ -113,6 +113,8 @@ export default function Assessment({ onComplete, onBack }) {
   const [identifyError, setIdentifyError] = useState(null);
   const [photoThumbs, setPhotoThumbs] = useState({});
   const fileRef = useRef(null);
+  const cameraRef = useRef(null);
+  const [showCamOptions, setShowCamOptions] = useState(false);
   const total = QUESTIONS.length + 1;
   const current = QUESTIONS[step - 1];
   const answer = current ? answers[current.id] : null;
@@ -280,11 +282,18 @@ export default function Assessment({ onComplete, onBack }) {
             )}
           </div>
           <span className="breed-more-or">or</span>
-          <div className="identify-wrap">
-            <button className="identify-btn" disabled={identifying} onClick={() => fileRef.current?.click()}>
+          <div className="identify-wrap" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setShowCamOptions(false); }}>
+            <button className="identify-btn" disabled={identifying} onClick={() => setShowCamOptions((v) => !v)}>
               {identifying ? 'Identifying…' : '📷 Snap a photo'}
             </button>
+            {showCamOptions && (
+              <div className="identify-options">
+                <button className="identify-option" onClick={() => { cameraRef.current?.click(); setShowCamOptions(false); }}>📷 Take a photo</button>
+                <button className="identify-option" onClick={() => { fileRef.current?.click(); setShowCamOptions(false); }}>🖼️ Choose from gallery</button>
+              </div>
+            )}
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
+            <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
             {identifyError && <p className="identify-error">{identifyError}</p>}
           </div>
         </div>
