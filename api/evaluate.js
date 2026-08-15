@@ -1,4 +1,5 @@
-const MODEL = 'google/gemini-2.5-flash';
+const MODEL = 'gemini-3.6-flash';
+const API_KEY = process.env.GEMINI_API_KEY;
 
 const BREED_RESEARCH = {
   french_bulldog: 'BOAS, heat intolerance, spinal disease, skin and eye concerns; use health-tested, functional lines.',
@@ -25,8 +26,11 @@ const BREED_CONTEXT = {
 };
 
 function extractText(data) {
-  const content = data?.choices?.[0]?.message?.content ?? data?.output?.[0]?.content?.[0]?.text ?? '';
-  return Array.isArray(content) ? content.map((item) => item.text || '').join('') : content;
+  const steps = Array.isArray(data?.steps) ? data.steps : [];
+  return steps
+    .filter((step) => step.type === 'model_output')
+    .map((step) => (Array.isArray(step.content) ? step.content.map((part) => part.text || '').join('') : ''))
+    .join('');
 }
 
 function parseJson(text) {
@@ -66,6 +70,9 @@ export default {
     if (request.method !== 'POST') {
       return json({ error: 'Method not allowed' }, 405);
     }
+    if (!API_KEY) {
+      return json({ error: 'GEMINI_API_KEY is not set on the server. Add it in Vercel → Settings → Environment Variables, then redeploy.' }, 500);
+    }
     try {
       const { breed, questions } = await request.json();
       if (!breed?.label || !Array.isArray(questions) || questions.length !== 8) {
@@ -73,8 +80,19 @@ export default {
       }
       const transcript = questions.map((question, index) => `${index + 1}. ${question.question}\nSelected: ${question.answer || 'No preset selection'}\nAdditional context: ${question.custom?.trim() || 'None provided'}`).join('\n\n');
       const prompt = `You are a dog-welfare evaluator. Judge the human's preparation, not the breed as a moral category. Give a distinct evaluation based on the actual answers below. Do not use a default score. A score must reflect the evidence: time, experience, training, safety, budget, motivation, and stability. Use the breed context as research guidance, not as a stereotype. Recommend an alternative only when it genuinely fits the stated life better, and explain why it fits this person's answers.\n\nBREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nReturn only JSON with exactly: score integer 0-100; verdict one plain-language sentence; readyFor; topWarnings array of 3 specific answer-based concerns; topStrengths array of 2 specific answer-based strengths; dogVoice 4-6 sentences; recommendation READY, CAUTION, or NOT_READY; alternateBreed string or empty; altReasons array of 3 reasons tied to this person’s answers; answerFindings array of exactly 8 objects with question, finding, concernLevel LOW/WATCH/ACTION. Never return generic filler, and never claim a statistic unless supported by the supplied context.`;
-      const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.AI_GATEWAY_API_KEY}` }, body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.45, max_tokens: 4200 }) });
-      if (!response.ok) throw new Error(`AI gateway ${response.status}`);
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
+        body: JSON.stringify({
+          model: MODEL,
+          input: prompt,
+          generation_config: { temperature: 0.45, max_output_tokens: 4200, thinking_level: 'minimal' },
+        }),
+      });
+      if (!response.ok) {
+        const detail = await response.text().catch(() => '');
+        throw new Error(`Gemini ${response.status} ${detail.slice(0, 200)}`);
+      }
       const result = normalize(parseJson(extractText(await response.json())), questions, breed);
       return json(result);
     } catch (error) {
