@@ -104,8 +104,10 @@ Set these in Vercel → Settings → Environment Variables, then redeploy. Keys 
 
 ## Prize Categories
 
-- **Best Use of Google AI** — Core AI assessment engine, breed health analysis, and photo-based breed identification
-- **Best Use of ElevenLabs** — Emotional "Read it to me" voice for the dog's letter (with graceful browser fallback)
+| Prize Category | How CanineIQ Meets It |
+| --- | --- |
+| **Best Use of Google AI** | Core AI assessment engine, breed health analysis, and photo-based breed identification all run on the Gemini API, with strict server-side validation so the model never controls the score |
+| **Best Use of ElevenLabs** | Emotional "Read it to me" voice for the dog's letter, with a graceful fallback to browser speech synthesis |
 
 ---
 
