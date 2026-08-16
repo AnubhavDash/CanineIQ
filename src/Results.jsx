@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Results.css';
+import { getBreedImage, FALLBACK_IMAGE } from './breedImages';
 
 const RECOMMENDATION_CONFIG = {
   READY: {
@@ -61,7 +62,7 @@ export default function Results({ data, results, onRetake, onHome }) {
   const audioRef = useRef(null);
   const rec = RECOMMENDATION_CONFIG[results.recommendation] || RECOMMENDATION_CONFIG.CAUTION;
   const breedId = data?.breed?.id;
-  const breedImage = data?.breed?.image || (breedId ? `/images/${breedId}.jpg` : 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg');
+  const breedImage = getBreedImage(breedId);
   const voiceScript = results.dogVoice || FALLBACK_VOICE;
 
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function Results({ data, results, onRetake, onHome }) {
             <div className="verdict-label section-label" style={{ color: rec.color }}>
               {rec.label} · Gemini assessment
             </div>
-            <div className="verdict-breed"><img className="result-breed-thumb" src={breedImage} alt="" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg'; }} /> {data.breed?.label}</div>
+            <div className="verdict-breed"><img className="result-breed-thumb" src={breedImage} alt="" onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }} /> {data.breed?.label}</div>
             <p className="verdict-sentence">{results.verdict}</p>
           </div>
         </div>
@@ -177,7 +178,7 @@ export default function Results({ data, results, onRetake, onHome }) {
             alt="An adorable dog"
             className="dog-img"
             onError={e => {
-              e.target.src = 'https://images.dog.ceo/breeds/retriever-golden/n02099601_6105.jpg';
+              e.target.src = FALLBACK_IMAGE;
             }}
           />
           <div className="dog-img-overlay" />
