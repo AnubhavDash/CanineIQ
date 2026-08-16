@@ -72,6 +72,8 @@ The entire flow — assessment, verdict, the dog's letter, read-aloud voice — 
 
 ## Setup
 
+**Option A — Run locally with `vercel dev` (full app, recommended):**
+
 ```bash
 git clone https://github.com/AnubhavDash/CanineIQ.git
 cd canineiq
@@ -80,8 +82,26 @@ npm install
 cp .env.example .env
 # Fill in your API keys in .env
 
-npm run dev
+npx vercel dev
+# → http://localhost:3000
 ```
+
+`vercel dev` runs the Vite UI **and** the `api/` serverless functions locally, and loads your `.env` keys — so the assessment, photo identification, and read-aloud all work. Requires a (free) Vercel account to log in once.
+
+**Option B — UI only (`npm run dev`):**
+
+```bash
+npm run dev
+# → http://localhost:5173
+```
+
+This serves the UI **only**. The `api/` functions don't run under plain Vite, so submitting an assessment or snapping a photo will show "not available in this local Vite preview" until you test against a deployed URL (Option A or Vercel).
+
+### Deploying to Vercel
+
+1. Push the repo to GitHub, then import it at [vercel.com/new](https://vercel.com/new).
+2. In **Project → Settings → Environment Variables**, add `GEMINI_API_KEY` (and optionally `ELEVENLABS_API_KEY` / `ELEVENLABS_VOICE_ID`).
+3. Redeploy. Keys are gitignored and never committed.
 
 ### Environment Variables
 
@@ -93,10 +113,6 @@ ELEVENLABS_API_KEY=        # ElevenLabs API key for the "Read it to me" feature
 # Optional:
 # ELEVENLABS_VOICE_ID=     # Overrides the default voice (designed voices only on free tier)
 ```
-
-Set these in Vercel → Settings → Environment Variables, then redeploy. Keys are gitignored and never committed.
-
-> Local `npm run dev` serves the UI only — the `api/` functions run on Vercel (or `vercel dev`), so test the assessment, photo identification, and read-aloud on your deployed URL.
 
 ---
 
