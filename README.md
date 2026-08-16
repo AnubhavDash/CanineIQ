@@ -10,7 +10,7 @@ CanineIQ is an AI-powered dog ownership readiness assessment and breed welfare t
 
 ## The Idea
 
-This came from [CCTV footage of a Patiala couple being mauled by a pitbull](https://www.indiatoday.in/india/story/pitbull-mauls-patiala-couple-both-hospitalised-woman-undergoes-plastic-surgery-2969903-2026-08-13) as they went to view a rental home — a dog that kept attacking even after its owner ordered it to stop, a dog left to roam free. The dog wasn't evil. The ownership was irresponsible.
+This came from the [CCTV footage in an India Today report](https://www.indiatoday.in/india/story/pitbull-mauls-patiala-couple-both-hospitalised-woman-undergoes-plastic-surgery-2969903-2026-08-13) of a Patiala couple being mauled by a pitbull as they went to view a rental home — a dog that kept attacking even after its owner ordered it to stop, a dog left to roam free. The dog wasn't evil. The ownership was irresponsible.
 
 The same energy drives the [brachycephalic problem](https://www.vet.cornell.edu/departments-centers-and-institutes/riney-canine-health-center/canine-health-topics/brachycephalic-obstructive-airway-syndrome-boas): French Bulldogs are the world's most popular breed, and a huge proportion of them will need palate surgery by age 3 because humans bred them to have faces that can't function.
 
