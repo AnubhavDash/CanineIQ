@@ -50,6 +50,9 @@ An honest breakdown of genetic health problems in 8 popular breeds — French Bu
 ### 4. Find Any Breed by Name or Photo
 Beyond the 10 core breeds, search **30 more** (40 total) through a dropdown that lazily loads each breed's image from the [Dog CEO API](https://dog.ceo/). Or **snap a photo** of a dog and **Gemini** (multimodal) identifies the breed, auto-selecting it for the assessment.
 
+### 5. Works on the Phone in Your Pocket
+The entire flow — assessment, verdict, the dog's letter, read-aloud voice — is tested and usable on a real Android phone (recorded at 382px wide) as well as desktop. It works out of the box with no API keys to enter, so anyone can try it on whatever device they're holding.
+
 ---
 
 ## Tech Stack
