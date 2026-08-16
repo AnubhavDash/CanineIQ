@@ -65,6 +65,16 @@ function parseJson(text) {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+function fallbackFinding(question, concernLevel) {
+  if (concernLevel === 'LOW') {
+    return `This answer aligns with the breed's needs and works in your favour.`;
+  }
+  if (concernLevel === 'WATCH') {
+    return `This answer needs careful planning — it is workable but only if you prepare for it deliberately.`;
+  }
+  return `This answer conflicts with the breed's real needs and should be resolved before you bring a dog home.`;
+}
+
 function normalize(result, questions, breed, scored, alternate) {
   const recommendation = ['READY', 'CAUTION', 'NOT_READY'].includes(result.recommendation) ? result.recommendation : 'CAUTION';
   const findings = Array.isArray(result.answerFindings) ? result.answerFindings : [];
@@ -79,9 +89,10 @@ function normalize(result, questions, breed, scored, alternate) {
     altReasons: Array.isArray(result.altReasons) ? result.altReasons.slice(0, 3) : [],
     answerFindings: questions.map((question, index) => {
       const computed = scored.findings[index] || { concernLevel: 'WATCH' };
+      const match = Array.isArray(findings) ? findings.find((f) => f?.question === question.question) : null;
       return {
         question: question.question,
-        finding: findings[index]?.finding || 'Gemini could not provide a finding for this answer.',
+        finding: match?.finding || fallbackFinding(question.question, computed.concernLevel),
         concernLevel: computed.concernLevel,
         points: computed.points,
       };
@@ -106,7 +117,7 @@ async function callModel(models, prompt) {
         body: JSON.stringify({
           model,
           input: prompt,
-          generation_config: { temperature: 0.45, max_output_tokens: 4200, thinking_level: 'minimal' },
+          generation_config: { temperature: 0.45, max_output_tokens: 6000, thinking_level: 'minimal' },
         }),
       });
       if (response.ok) return response;
@@ -145,7 +156,7 @@ PER-ANSWER POINTS:\n${scoreLine}
 
 CONCERNS AND STRENGTHS: Write concrete, personalised items tied to the person's actual answers and the breed's documented needs — not a restatement of their answer and not generic advice. Each concern must name the specific answer, why it is a genuine problem for THIS breed, and the concrete risk. Each strength must name the specific answer and why it is a genuine asset for THIS breed. Do not soften, pad, or invent. BALANCE: every concern and every strength must be the SAME length — each item between 25 and 40 words, with the same sentence structure (roughly 2-3 sentences each), so the two columns render at matching heights. Never write a long concern and a short strength (or vice versa).
 
-BREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nALTERNATE BREED: ${alternate ? `The best-fit alternative has been computed deterministically from the person's answers and the app's breed-need data. It is: ${alternate.label}. Use exactly this breed — do not substitute a different one. altReasons must explain why ${alternate.label} fits this person's actual answers (their space, time, budget, experience, and household), with each reason naming one of their answers and how it matches ${alternate.label}'s documented needs.` : 'No alternative breed applies — the person is already a strong fit, so return alternateBreed as an empty string and altReasons as an empty array.'}\n\nReturn only JSON with exactly: verdict one plain-language sentence; readyFor; topWarnings array of exactly 3 concrete answer-based concerns; topStrengths array of exactly 3 concrete answer-based strengths; dogVoice a short letter of 4-6 sentences written from the dog's own perspective — intimate, gentle, quietly sad, never preachy; name the breed's real daily reality and this person's specific situation, and if they chose the breed for status or appear unprepared, let the dog say what it actually needs from them; alternateBreed string or empty (${alternate ? `must be exactly "${alternate.label}"` : 'must be empty string'}); altReasons array of 3 reasons tied to this person's answers (only when alternateBreed is non-empty); answerFindings array of exactly 8 objects with question, finding only (the concern level is already computed and will be applied). Never return generic filler, and never claim a statistic unless supported by the supplied context. Do not include score or recommendation in the JSON.`;
+BREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research this breed’s documented care and temperament needs carefully.'}\nRESEARCH NOTES: ${BREED_RESEARCH[breed.id] || 'Use documented veterinary and welfare guidance; do not invent disease prevalence.'}\n\nANSWERS:\n${transcript}\n\nALTERNATE BREED: ${alternate ? `The best-fit alternative has been computed deterministically from the person's answers and the app's breed-need data. It is: ${alternate.label}. Use exactly this breed — do not substitute a different one. altReasons must explain why ${alternate.label} fits this person's actual answers (their space, time, budget, experience, and household), with each reason naming one of their answers and how it matches ${alternate.label}'s documented needs.` : 'No alternative breed applies — the person is already a strong fit, so return alternateBreed as an empty string and altReasons as an empty array.'}\n\nOUTPUT FORMAT — you MUST return one JSON object containing ALL of these fields, in this order, and you MUST NOT omit any of them:\n1. verdict: one plain-language sentence;\n2. readyFor: string;\n3. topWarnings: array of exactly 3 concrete answer-based concerns;\n4. topStrengths: array of exactly 3 concrete answer-based strengths;\n5. dogVoice: a short letter of 4-6 sentences written from the dog's own perspective — intimate, gentle, quietly sad, never preachy; name the breed's real daily reality and this person's specific situation, and if they chose the breed for status or appear unprepared, let the dog say what it actually needs from them;\n6. alternateBreed: string or empty (${alternate ? `must be exactly "${alternate.label}"` : 'must be empty string'});\n7. altReasons: array of 3 reasons tied to this person's answers (only when alternateBreed is non-empty);\n8. answerFindings: array of exactly 8 objects, one per question in the exact order of the ANSWERS list above, each object with the exact fields {\"question\": the question text verbatim, \"finding\": one concise sentence naming this person's specific answer and the concrete risk or asset it creates for THIS breed}. The concern level for each answer is already computed and will be applied automatically — do not add it to the JSON. answerFindings is REQUIRED and must always contain exactly 8 entries; never return it empty and never omit it.\n\nNever return generic filler, and never claim a statistic unless supported by the supplied context. Do not include score or recommendation in the JSON. Do not wrap the JSON in markdown.`;
       const response = await callModel(MODEL_CHAIN, prompt);
       const result = normalize(parseJson(extractText(await response.json())), questions, breed, scored, alternate);
       return json(result);
