@@ -75,6 +75,63 @@ function fallbackFinding(question, concernLevel) {
   return `This answer conflicts with the breed's real needs and should be resolved before you bring a dog home.`;
 }
 
+function deterministicResult(questions, breed, scored, alternate) {
+  const findings = scored.findings;
+  const answerFor = (q) => q?.answer || 'the answer given';
+  const byLevel = (level) => findings.filter((f) => f.concernLevel === level);
+
+  const action = byLevel('ACTION');
+  const watch = byLevel('WATCH');
+  const low = byLevel('LOW');
+
+  const warnings = (action.length ? action : watch).slice(0, 3).map((f) => {
+    const q = questions.find((x) => x.question === f.question);
+    return `For "${f.question}", "${answerFor(q)}" does not match the documented needs of a ${breed.label}. This has to change before the dog comes home.`;
+  });
+  while (warnings.length < 3) warnings.push(`A ${breed.label} has real, non-negotiable needs that the answers given do not yet cover. Address these before committing.`);
+
+  const strengths = (low.length ? low : watch).slice(0, 3).map((f) => {
+    const q = questions.find((x) => x.question === f.question);
+    return `For "${f.question}", "${answerFor(q)}" genuinely aligns with what a ${breed.label} needs. This is a real asset.`;
+  });
+  while (strengths.length < 3) strengths.push(`Honestly examining your life against the breed's real needs is itself a strength — most people never do it.`);
+
+  const verdict = scored.recommendation === 'READY'
+    ? `Your life genuinely matches the needs of a ${breed.label}.`
+    : scored.recommendation === 'CAUTION'
+      ? `A ${breed.label} is possible, but only if the gaps in the answers are closed first.`
+      : `The life described is not ready for a ${breed.label} yet. This is not a judgment of you as a person.`;
+
+  const dogVoice = scored.recommendation === 'READY'
+    ? `I can see you have done your homework. You know my energy, my coat, my costs, and my quirks, and you still said yes. That is the best gift I could ask for. I will try to be easy to love, and I hope you will keep being easy to love in return.`
+    : scored.recommendation === 'CAUTION'
+      ? `I am hopeful about you, honestly. You are not there yet, but you are willing to look at what I really need. Take the time to close those gaps — a steadier routine, a real training plan, a little more money — and I will be waiting for you. I do not need perfection. I need someone who keeps trying.`
+      : `I would love to live with you, but I have to be honest: I need more than what I see in your answers right now. My needs are specific, and my whole life depends on what you can give. Please do not bring me home until you are truly ready. I will wait.`;
+
+  return {
+    verdict,
+    readyFor: breed.label,
+    topWarnings: warnings,
+    topStrengths: strengths,
+    dogVoice,
+    alternateBreed: alternate?.label || '',
+    altReasons: alternate ? [
+      `${alternate.label} is a more forgiving match for the life described.`,
+      `The needs of ${alternate.label} align better with the space, time, and budget in the answers.`,
+      `Choosing ${alternate.label} gives both the dog and the owner a realistic chance of success.`,
+    ] : [],
+    answerFindings: questions.map((question, index) => {
+      const computed = scored.findings[index] || { concernLevel: 'WATCH' };
+      return {
+        question: question.question,
+        finding: fallbackFinding(question.question, computed.concernLevel),
+        concernLevel: computed.concernLevel,
+        points: computed.points,
+      };
+    }),
+  };
+}
+
 function normalize(result, questions, breed, scored, alternate) {
   const recommendation = ['READY', 'CAUTION', 'NOT_READY'].includes(result.recommendation) ? result.recommendation : 'CAUTION';
   const findings = Array.isArray(result.answerFindings) ? result.answerFindings : [];
@@ -138,15 +195,18 @@ export default {
     if (!API_KEY) {
       return json({ error: 'GEMINI_API_KEY is not set on the server. Add it in Vercel Settings - Environment Variables, then redeploy.' }, 500);
     }
+    let breed, questions, scored, alternate;
     try {
-      const { breed, questions } = await request.json();
+      const payload = await request.json();
+      breed = payload.breed;
+      questions = payload.questions;
       if (!breed?.label || !Array.isArray(questions) || questions.length !== 8) {
         return json({ error: 'Incomplete assessment' }, 400);
       }
       const transcript = questions.map((question, index) => `${index + 1}. ${question.question}\nSelected: ${question.answer || 'No preset selection'}\nAdditional context: ${question.custom?.trim() || 'None provided'}`).join('\n\n');
-      const scored = computeScore(breed, questions);
+      scored = computeScore(breed, questions);
       const scoreLine = scored.findings.map((f, index) => `${index + 1}. ${f.points}/100 · ${f.concernLevel}`).join('\n');
-      const alternate = scored.recommendation !== 'READY' ? bestAlternateBreed(breed, questions) : null;
+      alternate = scored.recommendation !== 'READY' ? bestAlternateBreed(breed, questions) : null;
       const prompt = `You are a dog-welfare evaluator. Judge the human's preparation against the real demands of the chosen breed, using their specific answers — never a default score, never generic filler.
 
 SCORING: The final score has already been computed deterministically. It is 8 answers, each weighed equally, adjusted for this breed's real demands (living space, experience, daily time, training plan, household safety, budget, motivation, life stability). Accept this score as fixed and never contradict it in your prose. Your job is the narrative, not the number.
@@ -162,7 +222,13 @@ BREED: ${breed.label}\nBREED CONTEXT: ${BREED_CONTEXT[breed.id] || 'Research thi
       return json(result);
     } catch (error) {
       console.error('[v0] Evaluation endpoint error:', error.message);
-      return json({ error: 'Evaluation unavailable. Please try again.' }, 502);
+      try {
+        const fallback = deterministicResult(questions, breed, scored, alternate);
+        return json(normalize(fallback, questions, breed, scored, alternate));
+      } catch (inner) {
+        console.error('[v0] Deterministic fallback failed:', inner.message);
+        return json({ error: 'Evaluation unavailable. Please try again.' }, 502);
+      }
     }
   },
 };
