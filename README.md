@@ -5,6 +5,7 @@
 CanineIQ is an AI-powered dog ownership readiness assessment and breed welfare transparency tool. Built for [DEV Weekend Challenge: Dog Days Edition](https://dev.to/challenges/weekend-2026-08-13).
 
 **Live demo:** https://canineiq.vercel.app/
+**Video walkthrough:** https://youtu.be/C8REqujvyx4
 
 ---
 
