@@ -145,3 +145,22 @@ Breed health information draws on public veterinary and welfare sources, includi
 ---
 
 *Built for DEV Weekend Challenge: Dog Days Edition — August 2026*
+
+---
+
+## Post-Submission Changes
+
+Per the [Dog Days contest rules](https://dev.to/page/weekend-challenge-v26-08-13-contest-rules), this section records what was completed before the submission deadline and what was completed after.
+
+**Completed before the deadline (Aug 16, 2026, 11:59 PM PDT — submission commit `26b7f10`):**
+- Full ownership readiness assessment (8 questions, deterministic scoring + Gemini narrative)
+- Breed health transparency pages
+- 40-breed search (10 core + 30 more via Dog CEO API)
+- Gemini photo-based breed identification
+- ElevenLabs "Read it to me" feature
+- Mobile-responsive UI and live deployment at https://canineiq.vercel.app/
+- Published DEV submission post and demo video
+
+**Completed after the deadline:**
+- Bug fix — photo identification: the "No dog detected" error box stayed visible permanently and could overlap the breed search dropdown, blocking selection. It now dismisses automatically when the user focuses or types in the search box or selects a breed from search, and a × button is provided to dismiss it manually. This is a UI/UX fix only; no judging-relevant features were added or changed.
+

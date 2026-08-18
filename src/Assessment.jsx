@@ -173,10 +173,11 @@ export default function Assessment({ onComplete, onBack }) {
     } catch { return null; }
   };
 
-  const selectBreed = (item) => { setSearchOpen(false); setBreed({ ...item, source: 'card', image: `/images/${item.id}.jpg` }); };
+  const selectBreed = (item) => { setSearchOpen(false); setIdentifyError(null); setBreed({ ...item, source: 'card', image: `/images/${item.id}.jpg` }); };
 
   const selectFromSearch = async (item) => {
     setSearchOpen(false);
+    setIdentifyError(null);
     let url = null;
     if (!photoThumbs[item.id]) {
       url = await dogceoImage(item.slug);
@@ -314,7 +315,7 @@ export default function Assessment({ onComplete, onBack }) {
         <div className="kicker breed-more-kicker">Don't see the dog?</div>
         <div className="breed-more-row">
           <div className="breed-search" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setSearchOpen(false); }}>
-            <input className="breed-search-input" id="breed-search" name="breed-search" value={query} onFocus={() => setSearchOpen(true)} onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }} placeholder="Search any breed…" />
+            <input className="breed-search-input" id="breed-search" name="breed-search" value={query} onFocus={() => { setIdentifyError(null); setSearchOpen(true); }} onChange={(e) => { setQuery(e.target.value); setIdentifyError(null); setSearchOpen(true); }} placeholder="Search any breed…" />
             {searchOpen && matches.length > 0 && (
               <ul className="breed-search-list">
                 {matches.map((item) => (
@@ -341,7 +342,7 @@ export default function Assessment({ onComplete, onBack }) {
               </div>
             )}
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => identifyDog(e.target.files?.[0])} />
-            {identifyError && <p className="identify-error">{identifyError}</p>}
+            {identifyError && <div className="identify-error" role="alert"><span>{identifyError}</span><button type="button" className="identify-error-dismiss" aria-label="Dismiss" onClick={() => setIdentifyError(null)}>×</button></div>}
           </div>
         </div>
         {breed?.source === 'photo' && <div className="identified-note">Identified from your photo: <strong>{breed.label}</strong> ✓</div>}
